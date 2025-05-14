@@ -1,0 +1,109 @@
+<?php
+
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
+class Sj4webCleaningDb extends Module
+{
+    public function __construct()
+    {
+        $this->name = 'sj4webcleaningdb';
+        $this->tab = 'administration';
+        $this->version = '1.0.0';
+        $this->author = 'SJ4WEB.FR';
+        $this->need_instance = 0;
+        $this->bootstrap = true;
+
+        parent::__construct();
+
+        $this->displayName = $this->trans('Nettoyage BDD PrestaShop', [], 'Modules.Sj4webCleaningDb.Admin');
+        $this->description = $this->trans('Nettoie certaines tables selon une durée de rétention. Exécution manuelle ou via CRON. Logs consultables.', [], 'Modules.Sj4webCleaningDb.Admin');
+
+        $this->ps_versions_compliancy = ['min' => '1.7.8.0', 'max' => _PS_VERSION_];
+
+    }
+
+    public function install()
+    {
+        return parent::install()
+            && $this->registerTab()
+            && $this->registerTab(true) // pour les logs
+            && $this->installDefaultConfig();
+    }
+
+    public function uninstall()
+    {
+        return parent::uninstall()
+            && $this->unregisterTab()
+            && $this->unregisterTab(true)
+            && $this->clearConfig();
+    }
+
+    protected function registerTab($logs = false)
+    {
+        $tab = new Tab();
+        $tab->active = 1;
+        $tab->class_name = $logs ? 'AdminSj4webCleaningDbLog' : 'AdminSj4webCleaningDb';
+        $tab->name = [];
+
+        foreach (Language::getLanguages(true) as $lang) {
+            $tab->name[$lang['id_lang']] = $logs
+                ? 'Logs Nettoyage BDD'
+                : 'Nettoyage BDD';
+        }
+
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
+        $tab->module = $this->name;
+
+        return $tab->add();
+    }
+
+    protected function unregisterTab($logs = false)
+    {
+        $idTab = Tab::getIdFromClassName($logs ? 'AdminSj4webCleaningDbLog' : 'AdminSj4webCleaningDb');
+        if ($idTab) {
+            $tab = new Tab($idTab);
+            return $tab->delete();
+        }
+        return true;
+    }
+
+    protected function installDefaultConfig()
+    {
+        $defaults = [
+            'SJ4WEB_CLEANINGDB_ENABLED_TABLES'      => json_encode([]),
+            'SJ4WEB_CLEANINGDB_RETENTION'           => json_encode([]),
+            'SJ4WEB_CLEANINGDB_CRON_TOKEN'          => Tools::passwdGen(32),
+            'SJ4WEB_CLEANINGDB_ENABLED'             => 1,
+            'SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED'    => 1,
+            'SJ4WEB_CLEANINGDB_ENABLE_BACKUP'       => 0,
+            'SJ4WEB_CLEANINGDB_LOG_RETENTION'       => 3,
+        ];
+        foreach ($defaults as $key => $value) {
+            Configuration::updateValue($key, $value);
+        }
+        return true;
+    }
+
+    public function getContent()
+    {
+        Tools::redirectAdmin('index.php?controller=AdminSj4webCleaningDb&configure=' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminSj4webCleaningDb'));
+    }
+
+    protected function clearConfig()
+    {
+        return Configuration::deleteByName('SJ4WEB_CLEANINGDB_ENABLED_TABLES')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_CRON_TOKEN')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_RETENTION')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_ENABLED')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_ENABLE_BACKUP')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_LOG_RETENTION');
+    }
+
+    public function isUsingNewTranslationSystem()
+    {
+        return true;
+    }
+}
