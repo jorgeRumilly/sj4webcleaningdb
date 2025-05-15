@@ -20,8 +20,8 @@ class Sj4webCleaningDbRunner
         $this->enabledTables = json_decode(Configuration::get('SJ4WEB_CLEANINGDB_ENABLED_TABLES'), true) ?? [];
         $this->retentionDays = json_decode(Configuration::get('SJ4WEB_CLEANINGDB_RETENTION'), true) ?? [];
 
-        $this->isCleaningEnabled = (bool) Configuration::get('SJ4WEB_CLEANINGDB_ENABLED');
-        $this->isOptimizeEnabled = (bool) Configuration::get('SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED');
+        $this->isCleaningEnabled = (bool)Configuration::get('SJ4WEB_CLEANINGDB_ENABLED');
+        $this->isOptimizeEnabled = (bool)Configuration::get('SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED');
 
         $this->originTag = $originTag ?: $this->detectOriginTag();
 
@@ -34,9 +34,9 @@ class Sj4webCleaningDbRunner
     }
 
     /**
-        * Donne le tag d'origine de l'appel
-        * @return string
-    */
+     * Donne le tag d'origine de l'appel
+     * @return string
+     */
     private function detectOriginTag(): string
     {
         if (php_sapi_name() === 'cli' || !isset($_SERVER['REMOTE_ADDR'])) {
@@ -49,13 +49,13 @@ class Sj4webCleaningDbRunner
     }
 
     /**
-        * Run the cleaning process based on the configuration
-        * @return void
-    */
+     * Run the cleaning process based on the configuration
+     * @return void
+     */
     public function runFromConfig()
     {
         $entries = [];
-        $tableSizesToLog  = [];
+        $tableSizesToLog = [];
         $now = date('Y-m-d H:i:s');
 
         if (!$this->isCleaningEnabled) {
@@ -67,40 +67,45 @@ class Sj4webCleaningDbRunner
                 $beforeSize = TableCleanerHelper::getTableSize($this->db, $full, _DB_NAME_);
                 switch ($table) {
                     case 'connections':
+                        $entries[] = $this->deleteOldConnection($full, $this->retentionDays[$table] ?? 90, $now);
+                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
+                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        break;
+
                     case 'pagenotfound':
                     case 'statssearch':
                         $entries[] = $this->deleteOldByDate($full, $this->retentionDays[$table] ?? 90, $now);
-                        $tableSizesToLog[$table] = ['index'  => count($entries),'before' => $beforeSize];
+                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
                         $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
                         break;
 
                     case 'cart':
                         $entries[] = $this->deleteOldCarts($full, $this->retentionDays[$table] ?? 180, $now);
-                        $tableSizesToLog[$table] = ['index'  => count($entries),'before' => $beforeSize];
+                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
                         $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
                         break;
 
                     case 'connections_source':
                         $entries[] = $this->deleteOrphans($full, $this->prefix . 'connections', 'id_connections', $now);
-                        $tableSizesToLog[$table] = ['index'  => count($entries),'before' => $beforeSize];
+                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
                         $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
                         break;
 
                     case 'guest':
-                        $entries[] = $this->deleteOrphans($full, $this->prefix . 'connections', 'id_guest', $now);
-                        $tableSizesToLog[$table] = ['index'  => count($entries),'before' => $beforeSize];
+                        $entries[] = $this->deleteOrphansGuest($full, $this->prefix . 'connections', 'id_guest', $now);
+                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
                         $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
                         break;
 
                     case 'cart_product':
                         $entries[] = $this->deleteOrphans($full, $this->prefix . 'cart', 'id_cart', $now);
-                        $tableSizesToLog[$table] = ['index'  => count($entries),'before' => $beforeSize];
+                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
                         $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
                         break;
 
                     default:
                         $entries[] = $this->originTag . " [$now] Table $full | Aucun traitement défini.";
-                        $tableSizesToLog[$table] = ['index'  => count($entries),'before' => $beforeSize];
+                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
                         $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
                 }
             }
@@ -127,11 +132,11 @@ class Sj4webCleaningDbRunner
     }
 
     /**
-        * Backup table data before deletion
-        * @param string $table
-        * @param string $whereClause
-        * @return void
-    */
+     * Backup table data before deletion
+     * @param string $table
+     * @param string $whereClause
+     * @return void
+     */
     private function backupTableData(string $table, string $whereClause): void
     {
         if (!(int)Configuration::get('SJ4WEB_CLEANINGDB_ENABLE_BACKUP')) {
@@ -145,10 +150,10 @@ class Sj4webCleaningDbRunner
     }
 
     /**
-        * Optimize and analyze tables
-        * @param string|null $now
-        * @return array
-    */
+     * Optimize and analyze tables
+     * @param string|null $now
+     * @return array
+     */
     public function optimizeTables(string $now = null): array
     {
         $now = $now ?: date('Y-m-d H:i:s');
@@ -170,13 +175,27 @@ class Sj4webCleaningDbRunner
         return $entries;
     }
 
+    protected function deleteOldConnection(string $table, int $days, string $now): string
+    {
+
+        $dateLimit = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        $where = "`date_add` < '" . pSQL($dateLimit) . "' and `id_guest` NOT IN (SELECT DISTINCT `id_guest` FROM `{$this->prefix}guest` where id_customer > 0`)";
+
+        $this->backupTableData($table, $where);
+        $sql = "DELETE FROM `$table` WHERE $where";
+        $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
+
+        return $this->originTag . " [$now] Table $table | Suppression > $days jours | Supprimés : $count";
+
+    }
+
     /**
-        * Delete old records by date
-        * @param string $table
-        * @param int $days
-        * @param string $now
-        * @return string
-    */
+     * Delete old records by date
+     * @param string $table
+     * @param int $days
+     * @param string $now
+     * @return string
+     */
     protected function deleteOldByDate(string $table, int $days, string $now): string
     {
 
@@ -192,13 +211,13 @@ class Sj4webCleaningDbRunner
     }
 
     /**
-        * Delete orphaned records
-        * @param string $table
-        * @param string $parentTable
-        * @param string $foreignKey
-        * @param string $now
-        * @return string
-    */
+     * Delete orphaned records
+     * @param string $table
+     * @param string $parentTable
+     * @param string $foreignKey
+     * @param string $now
+     * @return string
+     */
     protected function deleteOrphans(string $table, string $parentTable, string $foreignKey, string $now): string
     {
         $where = "`$foreignKey` NOT IN (SELECT DISTINCT `$foreignKey` FROM `$parentTable`)";
@@ -207,17 +226,37 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
 
-        return $this->originTag . " [$now] Table $table | Suppression orphelins ($foreignKey) | Supprimés : $count" ;
+        return $this->originTag . " [$now] Table $table | Suppression orphelins ($foreignKey) | Supprimés : $count";
 
     }
 
     /**
-        * Delete old carts
-        * @param string $table
-        * @param int $days
-        * @param string $now
-        * @return string
-    */
+     * Delete orphaned guest records
+     * @param string $table
+     * @param string $parentTable
+     * @param string $foreignKey
+     * @param string $now
+     * @return string
+     */
+    protected function deleteOrphansGuest(string $table, string $parentTable, string $foreignKey, string $now): string
+    {
+        $where = "`$foreignKey` NOT IN (SELECT DISTINCT `$foreignKey` FROM `$parentTable`) and `id_customer` = 0";
+
+        $this->backupTableData($table, $where);
+        $sql = "DELETE FROM `$table` WHERE $where";
+        $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
+
+        return $this->originTag . " [$now] Table $table | Suppression orphelins ($foreignKey) | Supprimés : $count";
+
+    }
+
+    /**
+     * Delete old carts
+     * @param string $table
+     * @param int $days
+     * @param string $now
+     * @return string
+     */
     protected function deleteOldCarts(string $table, int $days, string $now): string
     {
         $dateLimit = date('Y-m-d H:i:s', strtotime("-{$days} days"));
@@ -232,12 +271,12 @@ class Sj4webCleaningDbRunner
     }
 
     /**
-        * Clean up old log files
-        * @return void
-    */
+     * Clean up old log files
+     * @return void
+     */
     protected function cleanupOldLogs(): void
     {
-        $retention = (int) Configuration::get('SJ4WEB_CLEANINGDB_LOG_RETENTION');
+        $retention = (int)Configuration::get('SJ4WEB_CLEANINGDB_LOG_RETENTION');
         if ($retention <= 0) {
             return;
         }
@@ -253,25 +292,5 @@ class Sj4webCleaningDbRunner
             }
         }
     }
-
-//    protected function getTableSize(string $table, string $database): float
-//    {
-//        $sql = "
-//        SELECT data_length, index_length
-//        FROM information_schema.tables
-//        WHERE table_schema = '" . pSQL($database) . "'
-//          AND table_name = '" . pSQL($table) . "'
-//        LIMIT 1";
-//
-//        $rows = $this->db->executeS($sql);
-//
-//        if (!empty($rows[0])) {
-//            $data = $rows[0];
-//            return round(($data['data_length'] + $data['index_length']) / 1048576, 2);
-//        }
-//
-//        return 0.0;
-//    }
-
 
 }
