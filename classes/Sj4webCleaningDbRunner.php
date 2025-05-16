@@ -179,7 +179,7 @@ class Sj4webCleaningDbRunner
     {
 
         $dateLimit = date('Y-m-d H:i:s', strtotime("-{$days} days"));
-        $where = "`date_add` < '" . pSQL($dateLimit) . "' and `id_guest` NOT IN (SELECT DISTINCT `id_guest` FROM `{$this->prefix}guest` where id_customer > 0`)";
+        $where = "`date_add` < '" . pSQL($dateLimit) . "' and `id_guest` NOT IN (SELECT DISTINCT `id_guest` FROM `{$this->prefix}guest` where id_customer > 0)";
 
         $this->backupTableData($table, $where);
         $sql = "DELETE FROM `$table` WHERE $where";
