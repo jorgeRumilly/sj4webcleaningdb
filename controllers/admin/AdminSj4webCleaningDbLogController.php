@@ -1,4 +1,5 @@
 <?php
+require_once _PS_MODULE_DIR_ . 'sj4webcleaningdb/classes/TableCleanerHelper.php';
 
 class AdminSj4webCleaningDbLogController extends ModuleAdminController
 {
@@ -40,9 +41,13 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
             'form_action' => self::$currentIndex . '&token=' . $this->token,
         ]);
 
-//        $this->content .= $this->renderForm();
-//        $this->setTemplate('logs.tpl');
+        // Récupération des stats des tables
+        $tables = TableCleanerHelper::getCleanableTables(); // méthode déjà existante
+        $tableStats = TableCleanerHelper::getTableStats($tables);
 
+        $this->context->smarty->assign('table_stats', $tableStats);
+
+        $this->content .= $this->context->smarty->fetch(_PS_MODULE_DIR_ . 'sj4webcleaningdb/views/templates/admin/sj4web_cleaning_db_log/info-db.tpl');
         $this->content .= $this->renderForm();
         $this->content .= $this->context->smarty->fetch(_PS_MODULE_DIR_ . 'sj4webcleaningdb/views/templates/admin/sj4web_cleaning_db_log/logs.tpl');
         $this->context->smarty->assign([

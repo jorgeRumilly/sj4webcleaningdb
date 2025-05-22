@@ -2,8 +2,6 @@
 
 class TableCleanerHelper
 {
-
-
     /**
      * Optimize a table by running ANALYZE, CHECK, and OPTIMIZE commands
      * @param Db $db
@@ -16,12 +14,6 @@ class TableCleanerHelper
             $db->execute("OPTIMIZE TABLE `$table`");
             $db->execute("ANALYZE TABLE `$table`");
             $db->execute("SELECT COUNT(*) FROM `$table`");
-//            $stmt1 = $db->query("ANALYZE TABLE `$table`");
-//            $stmt1->fetchAll();
-//            $stmt2 = $db->query("CHECK TABLE `$table`");
-//            $stmt2->fetchAll();
-//            $stmt3 = $db->query("OPTIMIZE TABLE `$table`");
-//            $stmt3->fetchAll();
         } catch (Exception $e) {
             throw new Exception('Error optimizing table: ' . $e->getMessage());
         }
@@ -30,8 +22,8 @@ class TableCleanerHelper
     /**
      * Calcule la taille d'une table (data + index) en Mo.
      *
-     * @param Db     $db       Instance de connexion PrestaShop (Db::getInstance()).
-     * @param string $table    Nom de la table (sans backticks).
+     * @param Db $db Instance de connexion PrestaShop (Db::getInstance()).
+     * @param string $table Nom de la table (sans backticks).
      * @param string $database Nom de la base (ex: _DB_NAME_).
      *
      * @return float Taille en Mo, arrondie à 2 décimales.
@@ -48,43 +40,14 @@ class TableCleanerHelper
         $rows = $db->executeS($sql);
 
         if (!empty($rows[0])) {
-            $dataLength  = (int) $rows[0]['DATA_LENGTH'];
-            $indexLength = (int) $rows[0]['INDEX_LENGTH'];
+            $dataLength = (int)$rows[0]['DATA_LENGTH'];
+            $indexLength = (int)$rows[0]['INDEX_LENGTH'];
             return round(($dataLength + $indexLength) / 1048576, 2); // en Mo
         }
 
         return 0.0;
     }
 
-
-//    /**
-//     * Get the size of a table in MB
-//     * @param Db $db
-//     * @param string $table
-//     * @param string $database
-//     * @return float
-//     * @throws PrestaShopDatabaseException
-//     */
-//    public static function getTableSize($db, string $table, string $database): float
-//    {
-//        $sql = "
-//        SELECT data_length, index_length
-//        FROM information_schema.tables
-//        WHERE table_schema = '" . pSQL($database) . "'
-//          AND table_name = '" . pSQL($table) . "'
-//        LIMIT 1";
-//
-//        $rows = $db->executeS($sql);
-//
-//        if (!empty($rows[0])) {
-//            $data = $rows[0];
-//            $data_length = ($data['data_length']) ?? $data['DATA_LENGTH'];
-//            $index_length = ($data['index_length']) ?? $data['INDEX_LENGTH'];
-//            return round(((float)((int) $data_length + (int)$index_length) / 1048576), 2);
-//        }
-//
-//        return 0.0;
-//    }
 
     /**
      * Force un rebuild physique de la table via ALTER TABLE ENGINE=InnoDB
@@ -127,4 +90,81 @@ class TableCleanerHelper
             return false;
         }
     }
+
+    /**
+     * Récupère les stats (taille, lignes) pour un tableau de tables.
+     *
+     * @param array $tables Noms de tables SANS préfixe
+     * @return array Tableau associatif : [nom_table => ['rows' => int, 'size' => float]]
+     */
+    public static function getTableStats(array $tables): array
+    {
+        $prefix = _DB_PREFIX_;
+        $dbName = _DB_NAME_;
+        $stats = [];
+
+        if (empty($tables)) {
+            return $stats;
+        }
+
+        $tableList = array_map(function ($t) use ($prefix) {
+            return $prefix . $t;
+        }, $tables);
+
+        $inList = implode("','", array_map('pSQL', $tableList));
+
+        $sql = "
+        SELECT 
+            table_name, 
+            ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb,
+            table_rows
+        FROM information_schema.tables
+        WHERE table_schema = '" . pSQL($dbName) . "'
+        AND table_name IN ('$inList')
+    ";
+
+        $results = Db::getInstance()->executeS($sql);
+
+        foreach ($results as $row) {
+            $table = str_replace($prefix, '', $row['table_name']);
+            $stats[$table] = [
+                'rows' => (int)$row['table_rows'],
+                'size' => (float)$row['size_mb'],
+            ];
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Liste des tables nettoyables sans le préfixe
+     *
+     * @return array
+     */
+    public static function getCleanableTables(): array
+    {
+        return array_keys(self::getTablesConfig());
+    }
+
+    /**
+     * Liste des tables nettoyables avec le préfixe
+     *
+     * @return array
+     */
+    public static function getTablesConfig(): array
+    {
+        return [
+            'connections' => ['label' => 'Connections', 'clean_type' => 'date'],
+            'connections_source' => ['label' => 'Connections source', 'clean_type' => 'orphan'],
+            'guest' => ['label' => 'Guests', 'clean_type' => 'orphan'],
+            'cart' => ['label' => 'Paniers', 'clean_type' => 'date'],
+            'cart_product' => ['label' => 'Produits panier', 'clean_type' => 'orphan'],
+            'pagenotfound' => ['label' => 'Pages 404', 'clean_type' => 'date'],
+            'statssearch' => ['label' => 'Recherches', 'clean_type' => 'date'],
+//            'mail' => ['label' => 'Mails', 'clean_type' => 'date'],
+//            'log' => ['label' => 'Logs', 'clean_type' => 'date'],
+        ];
+    }
+
+
 }

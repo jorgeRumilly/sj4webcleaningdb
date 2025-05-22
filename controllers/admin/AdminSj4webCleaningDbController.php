@@ -1,6 +1,7 @@
 <?php
 
 require_once _PS_MODULE_DIR_ . 'sj4webcleaningdb/classes/Sj4webCleaningDbRunner.php';
+require_once _PS_MODULE_DIR_ . 'sj4webcleaningdb/classes/TableCleanerHelper.php';
 
 class AdminSj4webCleaningDbController extends ModuleAdminController
 {
@@ -28,15 +29,9 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
                 'connections' => ['connections_source', 'guest'],
             ],
         ]);
-//        $this->context->smarty->assign([
-//            'tables_config'    => $this->getTablesConfig(),
-//            'enabled_tables'   => json_decode(Configuration::get('SJ4WEB_CLEANINGDB_ENABLED_TABLES'), true) ?? [],
-//            'retention_values' => json_decode(Configuration::get('SJ4WEB_CLEANINGDB_RETENTION'), true) ?? [],
-//        ]);
 
         $this->content .= $this->context->smarty->fetch(_PS_MODULE_DIR_ . 'sj4webcleaningdb/views/templates/admin/sj4web_cleaning_db/configure.tpl');
         $this->content .= $this->renderForm();
-//      $this->content .= $this->context->smarty->fetch(_PS_MODULE_DIR_ . 'sj4webcleaningdb/views/templates/admin/sj4web_cleaning_db/tables-configure.tpl');
         $this->context->smarty->assign(['content' => $this->content,]);
     }
 
@@ -243,14 +238,6 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
 
     private function getTablesConfig()
     {
-        return [
-            'connections'        => ['label' => 'Connections', 'clean_type' => 'date'],
-            'connections_source' => ['label' => 'Connections source', 'clean_type' => 'orphan'],
-            'guest'              => ['label' => 'Guests', 'clean_type' => 'orphan'],
-            'cart'               => ['label' => 'Paniers', 'clean_type' => 'date'],
-            'cart_product'       => ['label' => 'Produits panier', 'clean_type' => 'orphan'],
-            'pagenotfound'       => ['label' => 'Pages 404', 'clean_type' => 'date'],
-            'statssearch'        => ['label' => 'Recherches', 'clean_type' => 'date']
-        ];
+        return TableCleanerHelper::getTablesConfig();
     }
 }
