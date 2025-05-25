@@ -72,17 +72,17 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
             // Enregistrer les jours de rétention
             Configuration::updateValue('SJ4WEB_CLEANINGDB_RETENTION', json_encode(Tools::getValue('retention_days', [])));
 
-            $this->confirmations[] = $this->trans('Configuration enregistrée.', [], 'Modules.Sj4webCleaningDb.Admin');
+            $this->confirmations[] = $this->trans('Configuration saved.', [], 'Modules.Sj4webcleaningdb.Admin');
         }
 
         if (Tools::isSubmit('submit_sj4web_cleaning_run')) {
             (new Sj4webCleaningDbRunner())->runFromConfig();
-            $this->confirmations[] = $this->trans('Nettoyage exécuté. Consultez les logs.', [], 'Modules.Sj4webCleaningDb.Admin');
+            $this->confirmations[] = $this->trans('Cleanup completed. Check the logs.', [], 'Modules.Sj4webcleaningdb.Admin');
         }
 
         if (Tools::isSubmit('submit_sj4web_cleaning_optimize_only')) {
             (new Sj4webCleaningDbRunner())->optimizeTables();
-            $this->confirmations[] = $this->trans('Optimisation seule exécutée.', [], 'Modules.Sj4webCleaningDb.Admin');
+            $this->confirmations[] = $this->trans('Optimization only completed.', [], 'Modules.Sj4webcleaningdb.Admin');
         }
     }
 
@@ -96,56 +96,56 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
         $fields_form = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Configuration du nettoyage BDD', [], 'Modules.Sj4webCleaningDb.Admin'),
+                    'title' => $this->trans('Database cleanup settings', [], 'Modules.Sj4webcleaningdb.Admin'),
                     'icon'  => 'icon-database'
                 ],
                 'input' => [
                     [
                         'type' => 'switch',
-                        'label' => $this->trans('Activer le nettoyage automatique', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'label' => $this->trans('Enable automatic cleanup', [], 'Modules.Sj4webcleaningdb.Admin'),
                         'name' => 'cleaning_enabled',
                         'is_bool' => true,
                         'values' => [
-                            ['id' => 'on',  'value' => 1, 'label' => $this->trans('Oui', [], 'Modules.Sj4webCleaningDb.Admin')],
-                            ['id' => 'off', 'value' => 0, 'label' => $this->trans('Non', [], 'Modules.Sj4webCleaningDb.Admin')],
+                            ['id' => 'on',  'value' => 1, 'label' => $this->trans('Yes', [], 'Modules.Sj4webcleaningdb.Admin')],
+                            ['id' => 'off', 'value' => 0, 'label' => $this->trans('No', [], 'Modules.Sj4webcleaningdb.Admin')],
                         ],
                     ],
                     [
                         'type' => 'switch',
-                        'label' => $this->trans('Activer l’optimisation des tables', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'label' => $this->trans('Enable table optimization', [], 'Modules.Sj4webcleaningdb.Admin'),
                         'name' => 'optimize_enabled',
                         'is_bool' => true,
                         'values' => [
-                            ['id' => 'on',  'value' => 1, 'label' => $this->trans('Oui', [], 'Modules.Sj4webCleaningDb.Admin')],
-                            ['id' => 'off', 'value' => 0, 'label' => $this->trans('Non', [], 'Modules.Sj4webCleaningDb.Admin')],
+                            ['id' => 'on',  'value' => 1, 'label' => $this->trans('Yes', [], 'Modules.Sj4webcleaningdb.Admin')],
+                            ['id' => 'off', 'value' => 0, 'label' => $this->trans('No', [], 'Modules.Sj4webcleaningdb.Admin')],
                         ],
                     ],
                     [
                         'type' => 'switch',
-                        'label' => $this->trans('Sauvegarder les tables avant suppression', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'label' => $this->trans('Backup tables before deletion', [], 'Modules.Sj4webcleaningdb.Admin'),
                         'name' => 'enable_backup',
                         'is_bool' => true,
-                        'desc' => $this->trans('Crée une copie des lignes supprimées dans une table `_save_` avant suppression.', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'desc' => $this->trans('Creates a copy of deleted rows in a `_save_` table before deletion.', [], 'Modules.Sj4webcleaningdb.Admin'),
                         'values' => [
-                            ['id' => 'on',  'value' => 1, 'label' => $this->trans('Oui', [], 'Modules.Sj4webCleaningDb.Admin')],
-                            ['id' => 'off', 'value' => 0, 'label' => $this->trans('Non', [], 'Modules.Sj4webCleaningDb.Admin')],
+                            ['id' => 'on',  'value' => 1, 'label' => $this->trans('Yes', [], 'Modules.Sj4webcleaningdb.Admin')],
+                            ['id' => 'off', 'value' => 0, 'label' => $this->trans('No', [], 'Modules.Sj4webcleaningdb.Admin')],
                         ],
                     ],
                 ],
                 'submit' => [
-                    'title' => $this->trans('Enregistrer la configuration', [], 'Modules.Sj4webCleaningDb.Admin'),
+                    'title' => $this->trans('Save configuration', [], 'Modules.Sj4webcleaningdb.Admin'),
                     'name' => 'submit_sj4web_cleaning_config'
                 ],
                 'buttons' => [
                     [
-                        'title' => $this->trans('Nettoyer maintenant', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'title' => $this->trans('Clean now', [], 'Modules.Sj4webcleaningdb.Admin'),
                         'name'  => 'submit_sj4web_cleaning_run',
                         'type'  => 'submit',
                         'class' => 'btn btn-danger float-end',
                         'icon'  => 'process-icon-refresh',
                     ],
                     [
-                        'title' => $this->trans('Optimiser les tables maintenant', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'title' => $this->trans('Optimize tables now', [], 'Modules.Sj4webcleaningdb.Admin'),
                         'name'  => 'submit_sj4web_cleaning_optimize_only',
                         'type'  => 'submit',
                         'class' => 'btn btn-secondary float-end me-2',
@@ -158,33 +158,33 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
         foreach ($tables as $table => $info) {
             $fields_form['form']['input'][] = [
                 'type' => 'switch',
-                'label' => $this->trans('Nettoyer la table "%s"', [$table], 'Modules.Sj4webCleaningDb.Admin'),
+                'label' => $this->trans('Clean table "%s"', [$table], 'Modules.Sj4webcleaningdb.Admin'),
                 'name'  => 'enabled_tables_' . $table,
                 'is_bool' => true,
                 'values' => [
                     [
                         'id'    => 'on',
                         'value' => 1,
-                        'label' => $this->trans('Oui', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'label' => $this->trans('Yes', [], 'Modules.Sj4webcleaningdb.Admin'),
                     ],
                     [
                         'id'    => 'off',
                         'value' => 0,
-                        'label' => $this->trans('Non', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'label' => $this->trans('No', [], 'Modules.Sj4webcleaningdb.Admin'),
                     ],
                 ],
-                'desc' => $this->trans('Active le nettoyage de la table "%s".', [$table], 'Modules.Sj4webCleaningDb.Admin'),
+                'desc' => $this->trans('Enable cleanup for table "%s".', [$table], 'Modules.Sj4webcleaningdb.Admin'),
             ];
 
             //, 'name' => $info['label']
             if ($info['clean_type'] === 'date') {
                 $fields_form['form']['input'][] = [
                     'type' => 'text',
-                    'label' => $this->trans('Durée de conservation pour "%s"', [$table], 'Modules.Sj4webCleaningDb.Admin'),
+                    'label' => $this->trans('Retention period for "%s"', [$table], 'Modules.Sj4webcleaningdb.Admin'),
                     'name'  => 'retention_days[' . $table . ']',
                     'class' => 'fixed-width-sm',
-                    'suffix' => $this->trans('jours', [], 'Modules.Sj4webCleaningDb.Admin'),
-                    'desc'   => $this->trans('Toutes les lignes antérieures à ce délai seront supprimées (si la table est cochée).', [], 'Modules.Sj4webCleaningDb.Admin'),
+                    'suffix' => $this->trans('days', [], 'Modules.Sj4webcleaningdb.Admin'),
+                    'desc'   => $this->trans('All rows older than this delay will be deleted (if the table is selected).', [], 'Modules.Sj4webcleaningdb.Admin'),
                     'min' => 0,
                     'step' => 1
                 ];
@@ -194,14 +194,14 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
         $fields_form['form']['input'][] = [
             'type' => 'html',
             'name' => 'html_data',
-            'html_content' => '<p>&nbsp;</p><h3>'.$this->trans('Archivage / Suppression des logs', [], 'Modules.Sj4webCleaningDb.Admin').'</h3>',
+            'html_content' => '<p>&nbsp;</p><h3>'.$this->trans('Log archiving / deletion', [], 'Modules.Sj4webcleaningdb.Admin').'</h3>',
         ];
         $fields_form['form']['input'][] = [
             'type' => 'text',
-            'label' => $this->trans('Durée de conservation des logs (mois)', [], 'Modules.Sj4webCleaningDb.Admin'),
+            'label' => $this->trans('Log retention period (months)', [], 'Modules.Sj4webcleaningdb.Admin'),
             'name' => 'log_retention_months',
             'class' => 'fixed-width-sm',
-            'desc' => $this->trans('Les fichiers de logs plus anciens seront automatiquement supprimés.', [], 'Modules.Sj4webCleaningDb.Admin'),
+            'desc' => $this->trans('Les fichiers de logs plus anciens seront automatiquement supprimés.', [], 'Modules.Sj4webcleaningdb.Admin'),
         ];
 
         $helper = new HelperForm();

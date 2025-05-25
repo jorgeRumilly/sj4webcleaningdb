@@ -78,7 +78,7 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
     {
         $file = $this->logDir . $date . '.log';
         if (!file_exists($file)) {
-            return $this->trans('Aucun log pour cette date.', [], 'Modules.Sj4webCleaningDb.Admin');
+            return $this->trans('No log available for this date.', [], 'Modules.Sj4webcleaningdb.Admin');
         }
 
         return file_get_contents($file);
@@ -216,24 +216,24 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
         $fields_form = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Consultation des logs', [], 'Modules.Sj4webCleaningDb.Admin'),
+                    'title' => $this->trans('Log viewer', [], 'Modules.Sj4webcleaningdb.Admin'),
                     'icon'  => 'icon-search'
                 ],
                 'input' => [
                     [
                         'type' => 'select',
-                        'label' => $this->trans('Date des logs', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'label' => $this->trans('Log date', [], 'Modules.Sj4webcleaningdb.Admin'),
                         'name'  => 'log_date',
                         'options' => [
                             'query' => $options,
                             'id'    => 'id_option',
                             'name'  => 'name'
                         ],
-                        'desc' => $this->trans('Choisissez la date du log à afficher.', [], 'Modules.Sj4webCleaningDb.Admin'),
+                        'desc' => $this->trans('Choose the log date to display.', [], 'Modules.Sj4webcleaningdb.Admin'),
                     ]
                 ],
                 'submit' => [
-                    'title' => $this->trans('Afficher les logs', [], 'Modules.Sj4webCleaningDb.Admin'),
+                    'title' => $this->trans('Display logs', [], 'Modules.Sj4webcleaningdb.Admin'),
                     'name'  => 'submit_view_logs'
                 ]
             ]

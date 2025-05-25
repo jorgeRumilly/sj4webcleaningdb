@@ -1,18 +1,18 @@
 <div class="row">
     <div class="col-md-6">
         <div class="panel">
-            <h3 class="panel-heading">{l s='Accéder aux logs' d='Modules.Sj4webCleaningDb.Admin'}</h3>
-            <p>{l s='Utilisez ce lien pour accéder aux logs' d='Modules.Sj4webCleaningDb.Admin'}</p>
+            <h3 class="panel-heading">{l s='Access logs' d='Modules.Sj4webcleaningdb.Admin'}</h3>
+            <p>{l s='Use this link to access the logs' d='Modules.Sj4webcleaningdb.Admin'}</p>
             <a href="{$link_to_logs}" class="btn btn-outline-secondary">
-                {l s='Voir les logs' d='Modules.Sj4webCleaningDb.Admin'}
+                {l s='View logs' d='Modules.Sj4webcleaningdb.Admin'}
             </a>
         </div>
     </div>
 
     <div class="col-md-6">
         <div class="panel">
-            <h3 class="panel-heading">{l s='Tâche CRON' d='Modules.Sj4webCleaningDb.Admin'}</h3>
-            <p>{l s='Utilisez ce lien dans un CRON si le nettoyage est activé. Cliquez sur le lien pour copier.' d='Modules.Sj4webCleaningDb.Admin'}</p>
+            <h3 class="panel-heading">{l s='CRON task' d='Modules.Sj4webcleaningdb.Admin'}</h3>
+            <p>{l s='Use this link in a CRON if cleanup is enabled. Click the link to copy it.' d='Modules.Sj4webcleaningdb.Admin'}</p>
             <input type="text"
                    class="form-control"
                    id="sj4web_cron_url"
@@ -20,7 +20,7 @@
                    value="{$cron_url}"
                    onclick="copyCronUrl()">
             <small id="sj4web_copy_feedback" class="form-text text-success" style="display:none;">
-                ✔️ {l s='Lien copié dans le presse-papier !' d='Modules.Sj4webCleaningDb.Admin'}
+                ✔️ {l s='Link copied to clipboard!' d='Modules.Sj4webcleaningdb.Admin'}
             </small>
         </div>
     </div>
@@ -39,7 +39,6 @@
     }
     document.addEventListener('DOMContentLoaded', () => {
         const dependencies = {/literal}{$table_dependencies|@json_encode nofilter}{literal};
-        console.log('Les dependences:', dependencies);
         const updateDependents = (parent) => {
             const parentName = `enabled_tables_${parent}`;
             const parentOn = document.querySelector(`input[name="${parentName}"][value="1"]`);
@@ -52,7 +51,6 @@
             if (!parentOn || !parentOff) return;
 
             const isEnabled = parentOn.checked;
-            console.log('isEnabled', isEnabled);
 
             dependencies[parent].forEach(child => {
                 const childName = `enabled_tables_${child}`;

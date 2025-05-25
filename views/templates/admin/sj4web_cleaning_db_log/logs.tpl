@@ -3,26 +3,26 @@
 {if empty($log_files)}
     <div class="panel">
         <div class="alert alert-warning">
-            {l s='Aucun fichier de log disponible pour le moment.' d='Modules.Sj4webCleaningDb.Admin'}
+            {l s='No log file available at the moment.' d='Modules.Sj4webcleaningdb.Admin'}
         </div>
     </div>
 {else}
     <div class="panel">
         <div class="panel-heading">
-            <i class="icon-file-text"></i> {l s='Fichiers de log disponibles' d='Modules.Sj4webCleaningDb.Admin'}
+            <i class="icon-file-text"></i> {l s='Available log files' d='Modules.Sj4webcleaningdb.Admin'}
         </div>
         <div class="panel-body">
             {if $log_summary && $log_summary|count > 0}
                 <table class="table table-bordered">
                     <thead class="thead-light">
                     <tr>
-                        <th>{l s='Table' d='Modules.Sj4webCleaningDb.Admin'}</th>
-                        <th>{l s='Suppressions' d='Modules.Sj4webCleaningDb.Admin'}</th>
-                        <th>{l s='Optimisation' d='Modules.Sj4webCleaningDb.Admin'}</th>
-                        <th>{l s='Origine' d='Modules.Sj4webCleaningDb.Admin'}</th>
-                        <th>{l s='Avant (Mo)' d='Modules.Sj4webCleaningDb.Admin'}</th>
-                        <th>{l s='Après (Mo)' d='Modules.Sj4webCleaningDb.Admin'}</th>
-                        <th>{l s='Gain (Mo)' d='Modules.Sj4webCleaningDb.Admin'}</th>
+                        <th>{l s='Table' d='Modules.Sj4webcleaningdb.Admin'}</th>
+                        <th>{l s='Deleted rows' d='Modules.Sj4webcleaningdb.Admin'}</th>
+                        <th>{l s='Optimization' d='Modules.Sj4webcleaningdb.Admin'}</th>
+                        <th>{l s='Origin' d='Modules.Sj4webcleaningdb.Admin'}</th>
+                        <th>{l s='Before (MB)' d='Modules.Sj4webcleaningdb.Admin'}</th>
+                        <th>{l s='After (MB)' d='Modules.Sj4webcleaningdb.Admin'}</th>
+                        <th>{l s='Gain (MB)' d='Modules.Sj4webcleaningdb.Admin'}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -39,7 +39,7 @@
                                         {elseif $tag == 'BO'}
                                             <span class="badge badge-success bg-success">BO</span>
                                         {elseif $tag == 'MANUEL'}
-                                            <span class="badge badge-secondary bg-secondary">MANUEL</span>
+                                            <span class="badge badge-secondary bg-secondary">MANUAL</span>
                                         {else}
                                             <span class="badge bg-light text-dark">{$tag}</span>
                                         {/if}
@@ -65,13 +65,13 @@
                     </tbody>
                 </table>
             {else}
-                <p class="text-muted">{l s='Aucune opération détectée dans ce fichier de log.' d='Modules.Sj4webCleaningDb.Admin'}</p>
+                <p class="text-muted">{l s='No operations detected in this log file.' d='Modules.Sj4webcleaningdb.Admin'}</p>
             {/if}
         </div>
     </div>
     <div class="panel">
         <div class="panel-heading">
-            <i class="icon-file"></i> {l s='Contenu brut du fichier log' d='Modules.Sj4webCleaningDb.Admin'} : <strong>{$log_date}</strong>
+            <i class="icon-file"></i> {l s='Raw content of the log file' d='Modules.Sj4webcleaningdb.Admin'} : <strong>{$log_date}</strong>
         </div>
         <div class="panel-body">
             <pre style="max-height: 400px; overflow: auto; background: #f9f9f9; border: 1px solid #ccc; padding: 10px;">{$log_content|escape:'htmlall':'UTF-8'}</pre>

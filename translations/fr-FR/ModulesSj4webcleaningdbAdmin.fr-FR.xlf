@@ -1,0 +1,247 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en-US" target-language="fr-FR" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="SJ4WEB - PrestaShop DB Cleanup">
+        <source>SJ4WEB - PrestaShop DB Cleanup</source>
+        <target>SJ4WEB - Nettoyage BDD PrestaShop</target>
+      </trans-unit>
+      <trans-unit id="Cleans specific tables based on a retention period. Manual or CRON execution. Logs available.">
+        <source>Cleans specific tables based on a retention period. Manual or CRON execution. Logs available.</source>
+        <target>Nettoie certaines tables selon une durée de rétention. Exécution manuelle ou via CRON. Logs consultables.</target>
+      </trans-unit>
+      <trans-unit id="DB Cleanup Logs">
+        <source>DB Cleanup Logs</source>
+        <target>Logs Nettoyage BDD</target>
+      </trans-unit>
+      <trans-unit id="DB Cleanup">
+        <source>DB Cleanup</source>
+        <target>Nettoyage BDD</target>
+      </trans-unit>
+      <trans-unit id="Configuration saved.">
+        <source>Configuration saved.</source>
+        <target>Configuration enregistrée.</target>
+      </trans-unit>
+      <trans-unit id="Cleanup completed. Check the logs.">
+        <source>Cleanup completed. Check the logs.</source>
+        <target>Nettoyage exécuté. Consultez les logs.</target>
+      </trans-unit>
+      <trans-unit id="Optimization only completed.">
+        <source>Optimization only completed.</source>
+        <target>Optimisation seule exécutée.</target>
+      </trans-unit>
+      <trans-unit id="Database cleanup settings">
+        <source>Database cleanup settings</source>
+        <target>Configuration du nettoyage BDD</target>
+      </trans-unit>
+      <trans-unit id="Enable automatic cleanup">
+        <source>Enable automatic cleanup</source>
+        <target>Activer le nettoyage automatique</target>
+      </trans-unit>
+      <trans-unit id="Enable table optimization">
+        <source>Enable table optimization</source>
+        <target>Activer l’optimisation des tables</target>
+      </trans-unit>
+      <trans-unit id="Yes">
+        <source>Yes</source>
+        <target>Oui</target>
+      </trans-unit>
+      <trans-unit id="No">
+        <source>No</source>
+        <target>Non</target>
+      </trans-unit>
+      <trans-unit id="Backup tables before deletion">
+        <source>Backup tables before deletion</source>
+        <target>Sauvegarder les tables avant suppression</target>
+      </trans-unit>
+      <trans-unit id="Creates a copy of deleted rows in a `_save_` table before deletion.">
+        <source>Creates a copy of deleted rows in a `_save_` table before deletion.</source>
+        <target>Crée une copie des lignes supprimées dans une table `_save_` avant suppression.</target>
+      </trans-unit>
+      <trans-unit id="Save configuration">
+        <source>Save configuration</source>
+        <target>Enregistrer la configuration</target>
+      </trans-unit>
+      <trans-unit id="Clean now">
+        <source>Clean now</source>
+        <target>Nettoyer maintenant</target>
+      </trans-unit>
+      <trans-unit id="Optimize tables now">
+        <source>Optimize tables now</source>
+        <target>Optimiser les tables maintenant</target>
+      </trans-unit>
+      <trans-unit id="Enable cleanup for table &quot;%s&quot;">
+        <source>Enable cleanup for table "%s"</source>
+        <target>Activer le nettoyage de la table "%s"</target>
+      </trans-unit>
+      <trans-unit id="Retention period for &quot;%s&quot;">
+        <source>Retention period for "%s"</source>
+        <target>Durée de conservation pour "%s"</target>
+      </trans-unit>
+      <trans-unit id="days">
+        <source>days</source>
+        <target>jours</target>
+      </trans-unit>
+      <trans-unit id="All rows older than this delay will be deleted (if the table is selected).">
+        <source>All rows older than this delay will be deleted (if the table is selected).</source>
+        <target>Toutes les lignes antérieures à ce délai seront supprimées (si la table est cochée).</target>
+      </trans-unit>
+      <trans-unit id="Log archiving / deletion">
+        <source>Log archiving / deletion</source>
+        <target>Archivage / Suppression des logs</target>
+      </trans-unit>
+      <trans-unit id="Log retention period (months)">
+        <source>Log retention period (months)</source>
+        <target>Durée de conservation des logs (mois)</target>
+      </trans-unit>
+      <trans-unit id="Older log files will be automatically deleted.">
+        <source>Older log files will be automatically deleted.</source>
+        <target>Les fichiers de logs plus anciens seront automatiquement supprimés.</target>
+      </trans-unit>
+      <trans-unit id="Access logs">
+        <source>Access logs</source>
+        <target>Accéder aux logs</target>
+      </trans-unit>
+      <trans-unit id="Use this link to access the logs">
+        <source>Use this link to access the logs</source>
+        <target>Utilisez ce lien pour accéder aux logs</target>
+      </trans-unit>
+      <trans-unit id="View logs">
+        <source>View logs</source>
+        <target>Voir les logs</target>
+      </trans-unit>
+      <trans-unit id="CRON task">
+        <source>CRON task</source>
+        <target>Tâche CRON</target>
+      </trans-unit>
+      <trans-unit id="Use this link in a CRON if cleanup is enabled. Click the link to copy it.">
+        <source>Use this link in a CRON if cleanup is enabled. Click the link to copy it.</source>
+        <target>Utilisez ce lien dans un CRON si le nettoyage est activé. Cliquez sur le lien pour copier.</target>
+      </trans-unit>
+      <trans-unit id="Link copied to clipboard!">
+        <source>Link copied to clipboard!</source>
+        <target>Lien copié dans le presse-papier !</target>
+      </trans-unit>
+      <trans-unit id="Table-specific cleanup">
+        <source>Table-specific cleanup</source>
+        <target>Nettoyage par table</target>
+      </trans-unit>
+      <trans-unit id="Keep data for">
+        <source>Keep data for</source>
+        <target>Conserver les données pendant</target>
+      </trans-unit>
+      <trans-unit id="No log file available at the moment.">
+        <source>No log file available at the moment.</source>
+        <target>Aucun fichier de log disponible pour le moment.</target>
+      </trans-unit>
+      <trans-unit id="Available log files">
+        <source>Available log files</source>
+        <target>Fichiers de log disponibles</target>
+      </trans-unit>
+      <trans-unit id="Table">
+        <source>Table</source>
+        <target>Table</target>
+      </trans-unit>
+      <trans-unit id="Deleted rows">
+        <source>Deleted rows</source>
+        <target>Suppressions</target>
+      </trans-unit>
+      <trans-unit id="Optimization">
+        <source>Optimization</source>
+        <target>Optimisation</target>
+      </trans-unit>
+      <trans-unit id="Origin">
+        <source>Origin</source>
+        <target>Origine</target>
+      </trans-unit>
+      <trans-unit id="Before (MB)">
+        <source>Before (MB)</source>
+        <target>Avant (Mo)</target>
+      </trans-unit>
+      <trans-unit id="After (MB)">
+        <source>After (MB)</source>
+        <target>Après (Mo)</target>
+      </trans-unit>
+      <trans-unit id="Gain (MB)">
+        <source>Gain (MB)</source>
+        <target>Gain (Mo)</target>
+      </trans-unit>
+      <trans-unit id="No operations detected in this log file.">
+        <source>No operations detected in this log file.</source>
+        <target>Aucune opération détectée dans ce fichier de log.</target>
+      </trans-unit>
+      <trans-unit id="Raw content of the log file">
+        <source>Raw content of the log file</source>
+        <target>Contenu brut du fichier log</target>
+      </trans-unit>
+      <trans-unit id="Current status of cleaned tables">
+        <source>Current status of cleaned tables</source>
+        <target>État actuel des tables traitées</target>
+      </trans-unit>
+      <trans-unit id="Number of rows">
+        <source>Number of rows</source>
+        <target>Nombre de lignes</target>
+      </trans-unit>
+      <trans-unit id="Size (MB)">
+        <source>Size (MB)</source>
+        <target>Taille (Mo)</target>
+      </trans-unit>
+      <trans-unit id="Log viewer">
+        <source>Log viewer</source>
+        <target>Consultation des logs</target>
+      </trans-unit>
+      <trans-unit id="Log date">
+        <source>Log date</source>
+        <target>Date des logs</target>
+      </trans-unit>
+      <trans-unit id="Choose the log date to display.">
+        <source>Choose the log date to display.</source>
+        <target>Choisissez la date du log à afficher.</target>
+      </trans-unit>
+      <trans-unit id="Display logs">
+        <source>Display logs</source>
+        <target>Afficher les logs</target>
+      </trans-unit>
+      <trans-unit id="1" resname="[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%">
+        <source>[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%</source>
+        <target>[$now] Table %table% | Suppression paniers inactifs &gt; %days% jours | Supprimés : %count%</target>
+      </trans-unit>
+      <trans-unit id="2" resname="[$now] Table %table% | Removed orphans (%foreignKey%) | Deleted: %count%">
+        <source>[$now] Table %table% | Removed orphans (%foreignKey%) | Deleted: %count%</source>
+        <target>[$now] Table %table% | Suppression orphelins (%foreignKey%) | Supprimés : %count%</target>
+      </trans-unit>
+      <trans-unit id="3" resname="[$now] Table %table% | Removed entries older than %days% days | Deleted: %count%">
+        <source>[$now] Table %table% | Removed entries older than %days% days | Deleted: %count%</source>
+        <target>[$now] Table %table% | Suppression &gt; %days% jours | Supprimés : %count%</target>
+      </trans-unit>
+      <trans-unit id="4" resname="[$now] Table %full% | OPTIMIZE error:">
+        <source>[$now] Table %full% | OPTIMIZE error:</source>
+        <target>[$now] Table %full% | Erreur OPTIMIZE :</target>
+      </trans-unit>
+      <trans-unit id="5" resname="%tag% [%now%] Table %full% | Check + Analyze + Optimize + Rebuild OK | Flush: %flush%">
+        <source>%tag% [%now%] Table %full% | Check + Analyze + Optimize + Rebuild OK | Flush: %flush%</source>
+        <target>%tag% [%now%] Table %full% | Check + Analyse + Optimisation + Rebuild OK | Flush : %flush%</target>
+      </trans-unit>
+      <trans-unit id="6" resname="[$now] Table %full% | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB">
+        <source>[$now] Table %full% | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB</source>
+        <target>[$now] Table %full% | Taille avant : %before% Mo | Taille après : %after% Mo | Gain : %gain% Mo</target>
+      </trans-unit>
+      <trans-unit id="7" resname="[$now] Optimization globally disabled.">
+        <source>[$now] Optimization globally disabled.</source>
+        <target>[$now] Optimisation désactivée globalement.</target>
+      </trans-unit>
+      <trans-unit id="8" resname="[$now] Table %full% | Size before: %before% MB | Size after: ... MB">
+        <source>[$now] Table %full% | Size before: %before% MB | Size after: ... MB</source>
+        <target>[$now] Table %full% | Taille avant : %before% Mo | Taille après : ... Mo</target>
+      </trans-unit>
+      <trans-unit id="9" resname="[$now] Table %full% | No processing defined.">
+        <source>[$now] Table %full% | No processing defined.</source>
+        <target>[$now] Table %full% | Aucun traitement défini.</target>
+      </trans-unit>
+      <trans-unit id="10" resname="[$now] Cleanup globally disabled.">
+        <source>[$now] Cleanup globally disabled.</source>
+        <target>[$now] Nettoyage désactivé globalement.</target>
+      </trans-unit>	  
+    </body>
+  </file>
+</xliff>

@@ -17,8 +17,8 @@ class Sj4webCleaningDb extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->trans('Nettoyage BDD PrestaShop', [], 'Modules.Sj4webCleaningDb.Admin');
-        $this->description = $this->trans('Nettoie certaines tables selon une durée de rétention. Exécution manuelle ou via CRON. Logs consultables.', [], 'Modules.Sj4webCleaningDb.Admin');
+        $this->displayName = $this->trans('SJ4WEB - PrestaShop DB Cleanup', [], 'Modules.Sj4webcleaningdb.Admin');
+        $this->description = $this->trans('Cleans specific tables based on a retention period. Manual or CRON execution. Logs available.', [], 'Modules.Sj4webcleaningdb.Admin');
 
         $this->ps_versions_compliancy = ['min' => '1.7.8.0', 'max' => _PS_VERSION_];
 
@@ -49,8 +49,8 @@ class Sj4webCleaningDb extends Module
 
         foreach (Language::getLanguages(true) as $lang) {
             $tab->name[$lang['id_lang']] = $logs
-                ? 'Logs Nettoyage BDD'
-                : 'Nettoyage BDD';
+                ? $this->trans('DB Cleanup Logs', [], 'Modules.Sj4webcleaningdb.Admin')
+                : $this->trans('DB Cleanup', [], 'Modules.Sj4webcleaningdb.Admin');
         }
 
         $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
