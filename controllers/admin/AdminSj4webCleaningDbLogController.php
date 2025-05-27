@@ -29,7 +29,7 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
             if (!array_key_exists($selected, $logFiles)) {
                 $selected = key($logFiles);
             }
-            $logContent = $this->readLog($selected);
+            $logContent = $this->readLogLines($selected);
             $logSummary = $this->getLogSummaryWithGain($logContent);
         }
 
@@ -73,134 +73,170 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
         return $dates;
     }
 
-    private function readLog(string $date): string
+    protected function readLogLines(string $date): array
     {
         $file = $this->logDir . $date . '.log';
         if (!file_exists($file)) {
-            return $this->trans('No log available for this date.', [], 'Modules.Sj4webcleaningdb.Admin');
+            return [];
         }
 
-        return file_get_contents($file);
-    }
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $formatted = [];
 
-    /**
-     * Résume les lignes du fichier log en cumulant les suppressions
-     * et en détectant si une optimisation a été faite pour chaque table.
-     *
-     * Les tags d'origine ([CRON], [BO], [MANUEL]) sont extraits s'ils existent.
-     *
-     * @param string $logContent Contenu brut du fichier .log
-     * @return array Résumé des actions par table (delete, optimize, tag)
-     */
-    private function parseLogSummary(string $logContent): array
-    {
-        $summary = [];
+        foreach ($lines as $line) {
+            $entry = json_decode($line, true);
 
-        foreach (explode("\n", $logContent) as $line) {
-            // Suppressions
-            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Suppression.*?\| Supprimés : (\d+)#', $line, $m)) {
-                [$tag, $table, $count] = [$m[1] ?? null, $m[2], (int)$m[3]];
-                if (!isset($summary[$table])) {
-                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0, 'after' => 0];
-                }
-                $summary[$table]['delete'] += $count;
-                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
-                    $summary[$table]['tags'][] = $tag;
-                }
+            if (!is_array($entry) || !isset($entry['type'])) {
+                $formatted[] = htmlspecialchars($line);
+                continue;
             }
 
-            // Optimisations
-            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Optimisée#', $line, $m)) {
-                [$tag, $table] = [$m[1] ?? null, $m[2]];
-                if (!isset($summary[$table])) {
-                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0, 'after' => 0];
-                }
-                $summary[$table]['optimize'] = true;
-                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
-                    $summary[$table]['tags'][] = $tag;
-                }
-            }
+            $translated = $this->trans(
+                $this->getLogTranslationKey($entry['type']),
+                $entry['context'],
+                'Modules.Sj4webcleaningdb.Admin'
+            );
 
-            // Taille avant
-            if (preg_match('#Table (\w+)\s+\| Taille avant : ([0-9.]+) Mo#', $line, $m)) {
-                $table = $m[1];
-                $val = (float) $m[2];
-                $summary[$table]['before'] = ($summary[$table]['before'] ?? 0) + $val;
-            }
-
-            // Taille après
-            if (preg_match('#Table (\w+)\s+\| Taille après : ([0-9.]+) Mo\b#', $line, $m)) {
-                $table = $m[1];
-                $val = (float) $m[2];
-                $summary[$table]['after'] = ($summary[$table]['after'] ?? 0) + $val;
-            }
+            $formatted[] = sprintf('%s [%s] %s',
+                htmlspecialchars($entry['origin'] ?? ''),
+                htmlspecialchars($entry['timestamp']),
+                $translated
+            );
         }
 
-        ksort($summary);
-        return $summary;
+        return $formatted;
     }
+
 
     /**
      * Analyse un contenu de log et retourne un tableau synthétique par table
      * avec suppressions, optimisation, origine, tailles avant/après, et gain.
      *
-     * @param string $logContent Contenu brut du log.
+     * @param array $logLines Contenu brut du log.
      * @return array Tableau associatif structuré par table.
      */
-    private function getLogSummaryWithGain(string $logContent): array
+    protected function getLogSummaryWithGain(array $logLines): array
     {
         $summary = [];
 
-        foreach (explode("\n", $logContent) as $line) {
-            // Suppressions
-            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Suppression.*?\| Supprimés : (\d+)#', $line, $m)) {
-                [$tag, $table, $count] = [$m[1] ?? null, $m[2], (int)$m[3]];
-                if (!isset($summary[$table])) {
-                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0.00, 'after' => 0.00];
-                }
-                $summary[$table]['delete'] += $count;
-                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
-                    $summary[$table]['tags'][] = $tag;
-                }
+        foreach ($logLines as $line) {
+            // Skip already translated string lines
+            if (!str_starts_with($line, '{')) {
+                continue;
             }
 
-            // Optimisation
-            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Optimisée#', $line, $m)) {
-                [$tag, $table] = [$m[1] ?? null, $m[2]];
-                if (!isset($summary[$table])) {
-                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0, 'after' => 0];
-                }
-                $summary[$table]['optimize'] = true;
-                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
-                    $summary[$table]['tags'][] = $tag;
-                }
+            $entry = json_decode($line, true);
+            if (!is_array($entry) || !isset($entry['type'])) {
+                continue;
             }
 
-            $line = str_replace('è', 'e', $line);
-            // Taille avant (garder la 1ère valeur seulement)
-            if (preg_match('#Table (\w+)\s+\| Taille avant : ([0-9.]+) Mo#', $line, $m)) {
-                $table = $m[1];
-                $val = (float) $m[2];
-                if (!isset($summary[$table]['before']) || $summary[$table]['before'] === 0.0) {
-                    $summary[$table]['before'] = $val;
-                }
+            $ctx = $entry['context'];
+            $type = $entry['type'];
+            $table = $ctx['table'] ?? null;
+            if (!$table) continue;
+
+            $summary[$table] ??= ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0.0, 'after' => 0.0];
+
+            if (!empty($entry['origin']) && !in_array($entry['origin'], $summary[$table]['tags'])) {
+                $summary[$table]['tags'][] = trim($entry['origin'], '[]');
             }
 
-            // Taille après (écraser à chaque fois pour garder la dernière)
-            if (preg_match('#Table (\w+).*?Taille apres : ([0-9.]+) Mo#', $line, $m)) {
-                $summary[$m[1]]['after'] = (float) $m[2];
+            switch ($type) {
+                case 'rows_deleted_by_age':
+                case 'orphans_deleted':
+                case 'old_carts_deleted':
+                    $summary[$table]['delete'] += (int)($ctx['deleted'] ?? 0);
+                    break;
+
+                case 'table_optimized':
+                    $summary[$table]['optimize'] = true;
+                    break;
+
+                case 'table_size_info':
+                    $summary[$table]['before'] = (float)($ctx['before'] ?? 0.0);
+                    $summary[$table]['after'] = (float)($ctx['after'] ?? 0.0);
+                    break;
             }
         }
 
-        // Ajout du gain
-        foreach ($summary as $table => &$data) {
-            $data['gain'] = round($data['before'] - $data['after'], 2);
+        foreach ($summary as &$row) {
+            $row['gain'] = round($row['before'] - $row['after'], 2);
         }
 
         ksort($summary);
         return $summary;
     }
 
+
+//    private function getLogSummaryWithGain(string $logContent): array
+//    {
+//        $summary = [];
+//
+//        foreach (explode("\n", $logContent) as $line) {
+//            // Suppressions
+//            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Suppression.*?\| Supprimés : (\d+)#', $line, $m)) {
+//                [$tag, $table, $count] = [$m[1] ?? null, $m[2], (int)$m[3]];
+//                if (!isset($summary[$table])) {
+//                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0.00, 'after' => 0.00];
+//                }
+//                $summary[$table]['delete'] += $count;
+//                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
+//                    $summary[$table]['tags'][] = $tag;
+//                }
+//            }
+//
+//            // Optimisation
+//            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Optimisée#', $line, $m)) {
+//                [$tag, $table] = [$m[1] ?? null, $m[2]];
+//                if (!isset($summary[$table])) {
+//                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0, 'after' => 0];
+//                }
+//                $summary[$table]['optimize'] = true;
+//                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
+//                    $summary[$table]['tags'][] = $tag;
+//                }
+//            }
+//
+//            $line = str_replace('è', 'e', $line);
+//            // Taille avant (garder la 1ère valeur seulement)
+//            if (preg_match('#Table (\w+)\s+\| Taille avant : ([0-9.]+) Mo#', $line, $m)) {
+//                $table = $m[1];
+//                $val = (float) $m[2];
+//                if (!isset($summary[$table]['before']) || $summary[$table]['before'] === 0.0) {
+//                    $summary[$table]['before'] = $val;
+//                }
+//            }
+//
+//            // Taille après (écraser à chaque fois pour garder la dernière)
+//            if (preg_match('#Table (\w+).*?Taille apres : ([0-9.]+) Mo#', $line, $m)) {
+//                $summary[$m[1]]['after'] = (float) $m[2];
+//            }
+//        }
+//
+//        // Ajout du gain
+//        foreach ($summary as $table => &$data) {
+//            $data['gain'] = round($data['before'] - $data['after'], 2);
+//        }
+//
+//        ksort($summary);
+//        return $summary;
+//    }
+
+    protected function getLogTranslationKey(string $type): string
+    {
+        return match ($type) {
+            'table_size_info' => 'Table "%table%" | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB',
+            'rows_deleted_by_age' => 'Table "%table%" | Deleted rows older than %days% days: %deleted%',
+            'orphans_deleted' => 'Table "%table%" | Orphan cleanup (%foreign_key%): %deleted% removed',
+            'old_carts_deleted' => 'Table "%table%" | Inactive carts deleted (> %days% days): %deleted%',
+            'optimization_disabled' => 'Optimization is globally disabled.',
+            'table_optimized' => 'Table "%table%" | Optimization completed (Flush: %flush%)',
+            'optimize_error'  => 'Table "%table%" | Optimization error: %error%',
+            'no_action_defined' => 'Table "%table%" | No cleanup rule defined.',
+            'cleaning_disabled_globally' => 'Cleanup is globally disabled.',
+            default => '[Unknown log entry]'
+        };
+    }
 
     public function renderForm()
     {

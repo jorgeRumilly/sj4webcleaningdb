@@ -206,6 +206,42 @@
         <source>Display logs</source>
         <target>Afficher les logs</target>
       </trans-unit>
+    <trans-unit id="Table size info">
+      <source>Table "%table%" | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB</source>
+      <target>Table « %table% » | Taille avant : %before% Mo | Taille après : %after% Mo | Gain : %gain% Mo</target>
+    </trans-unit>
+    <trans-unit id="Rows deleted by age">
+      <source>Table "%table%" | Deleted rows older than %days% days: %deleted%</source>
+      <target>Table « %table% » | Suppression des lignes de plus de %days% jours : %deleted%</target>
+    </trans-unit>
+    <trans-unit id="Orphans deleted">
+      <source>Table "%table%" | Orphan cleanup (%foreign_key%): %deleted% removed</source>
+      <target>Table « %table% » | Suppression des orphelins (%foreign_key%) : %deleted% supprimés</target>
+    </trans-unit>
+    <trans-unit id="Old carts deleted">
+      <source>Table "%table%" | Inactive carts deleted (&gt; %days% days): %deleted%</source>
+      <target>Table « %table% » | Suppression des paniers inactifs (&gt; %days% jours) : %deleted%</target>
+    </trans-unit>
+    <trans-unit id="Optimization disabled">
+      <source>Optimization is globally disabled.</source>
+      <target>L’optimisation est désactivée globalement.</target>
+    </trans-unit>
+    <trans-unit id="Table optimized">
+      <source>Table "%table%" | Optimization completed (Flush: %flush%)</source>
+      <target>Table « %table% » | Optimisation terminée (Flush : %flush%)</target>
+    </trans-unit>
+    <trans-unit id="Optimize error">
+      <source>Table "%table%" | Optimization error: %error%</source>
+      <target>Table « %table% » | Erreur lors de l’optimisation : %error%</target>
+    </trans-unit>
+    <trans-unit id="No action defined">
+      <source>Table "%table%" | No cleanup rule defined.</source>
+      <target>Table « %table% » | Aucun traitement défini.</target>
+    </trans-unit>
+    <trans-unit id="Cleaning disabled globally">
+      <source>Cleanup is globally disabled.</source>
+      <target>Le nettoyage est désactivé globalement.</target>
+    </trans-unit>
       <trans-unit id="1" resname="[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%">
         <source>[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%</source>
         <target>[$now] Table %table% | Suppression paniers inactifs &gt; %days% jours | Supprimés : %count%</target>

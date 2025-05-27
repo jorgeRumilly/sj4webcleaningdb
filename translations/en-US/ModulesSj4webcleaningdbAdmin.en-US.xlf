@@ -206,6 +206,43 @@
         <source>Display logs</source>
         <target>Display logs</target>
       </trans-unit>
+    <trans-unit id="Table size info">
+      <source>Table "%table%" | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB</source>
+      <target>Table "%table%" | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB</target>
+    </trans-unit>
+    <trans-unit id="Rows deleted by age">
+      <source>Table "%table%" | Deleted rows older than %days% days: %deleted%</source>
+      <target>Table "%table%" | Deleted rows older than %days% days: %deleted%</target>
+    </trans-unit>
+    <trans-unit id="Orphans deleted">
+      <source>Table "%table%" | Orphan cleanup (%foreign_key%): %deleted% removed</source>
+      <target>Table "%table%" | Orphan cleanup (%foreign_key%): %deleted% removed</target>
+    </trans-unit>
+    <trans-unit id="Old carts deleted">
+      <source>Table "%table%" | Inactive carts deleted (&gt; %days% days): %deleted%</source>
+      <target>Table "%table%" | Inactive carts deleted (&gt; %days% days): %deleted%</target>
+    </trans-unit>
+    <trans-unit id="Optimization disabled">
+      <source>Optimization is globally disabled.</source>
+      <target>Optimization is globally disabled.</target>
+    </trans-unit>
+    <trans-unit id="Table optimized">
+      <source>Table "%table%" | Optimization completed (Flush: %flush%)</source>
+      <target>Table "%table%" | Optimization completed (Flush: %flush%)</target>
+    </trans-unit>
+    <trans-unit id="Optimize error">
+      <source>Table "%table%" | Optimization error: %error%</source>
+      <target>Table "%table%" | Optimization error: %error%</target>
+    </trans-unit>
+    <trans-unit id="No action defined">
+      <source>Table "%table%" | No cleanup rule defined.</source>
+      <target>Table "%table%" | No cleanup rule defined.</target>
+    </trans-unit>
+    <trans-unit id="Cleaning disabled globally">
+      <source>Cleanup is globally disabled.</source>
+      <target>Cleanup is globally disabled.</target>
+    </trans-unit>
+
       <trans-unit id="1" resname="[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%">
         <source>[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%</source>
         <target>[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%</target>
