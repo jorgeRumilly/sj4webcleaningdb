@@ -17,6 +17,14 @@ Il permet de supprimer les anciennes données inutiles (paniers expirés, connex
 - Suppression automatique des anciens fichiers logs (selon la durée choisie)
 - Tâche CRON sécurisée pour automatiser le nettoyage
 - Optimisation des tables (`OPTIMIZE TABLE`) après suppression
+- Traductions multilingues via système moderne PrestaShop 8+
+
+---
+
+## 🧩 Compatibilité
+
+- PrestaShop **1.7.8** à **8.x**
+- PHP **>= 7.4**
 
 ---
 
@@ -49,6 +57,25 @@ Exécute cette URL régulièrement via un cron job (ex. chaque nuit à 4h).
 - Deux vues sont disponibles dans le BO :
   - **Vue brute** du fichier log
   - **Synthèse lisible**, par table et action
+
+---
+
+## 🌐 Traduction
+
+Le module utilise le **nouveau système de traduction PrestaShop 8+**.  
+Toutes les chaînes sont déclarées via la méthode `trans()` avec un domaine spécifique :
+
+- **Domaine utilisé :** `Modules.Sj4webcleaningdb.Admin`
+- Fichiers de traduction au format **XLF** : `/translations/fr-FR/modules.sj4webcleaningdb.admin.xlf`, etc.
+
+Pour traduire les libellés du back-office :
+
+1. Accédez à **International > Traductions**
+2. Choisissez :
+- Type de traduction : *Modules installés*
+- Sélectionnez le module : *sj4webcleaningdb*
+- Choisissez la langue : *Français (ou autre)*
+3. Traduisez les chaînes selon vos besoins.
 
 ---
 

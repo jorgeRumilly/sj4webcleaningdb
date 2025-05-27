@@ -15,7 +15,7 @@ class Sj4webCleaningDbRunner
 
     protected $translator;
 
-    public function __construct($originTag = null)
+    public function __construct($originTag = null, $translator = null)
     {
         $this->db = Db::getInstance();
         $this->prefix = _DB_PREFIX_;
@@ -34,8 +34,12 @@ class Sj4webCleaningDbRunner
         }
 
         $this->logFile = $logDir . date('Y-m-d') . '.log';
+        if($translator) {
+            $this->translator = $translator;
+        } else {
+            $this->translator = SymfonyContainer::getInstance()->get('translator');
+        }
 
-        $this->translator = SymfonyContainer::getInstance()->get('translator');
     }
 
     /**
@@ -64,8 +68,8 @@ class Sj4webCleaningDbRunner
         $now = date('Y-m-d H:i:s');
 
         if (!$this->isCleaningEnabled) {
-//            $entries[] = $this->originTag . " [$now] Nettoyage désactivé globalement.";
-            $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Cleanup globally disabled.', [], 'Modules.Sj4webcleaningdb.Admin');
+            $entries[] = $this->originTag . " [$now] Nettoyage désactivé globalement.";
+//            $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Cleanup globally disabled.', [], 'Modules.Sj4webcleaningdb.Admin');
         } else {
             foreach ($this->enabledTables as $table) {
                 $full = $this->prefix . $table;
@@ -75,52 +79,52 @@ class Sj4webCleaningDbRunner
                     case 'connections':
                         $entries[] = $this->deleteOldConnection($full, $this->retentionDays[$table] ?? 90, $now);
                         $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-//                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
-                        $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: ... MB', ['%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+//                        $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: ... MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
                         break;
 
                     case 'pagenotfound':
                     case 'statssearch':
                         $entries[] = $this->deleteOldByDate($full, $this->retentionDays[$table] ?? 90, $now);
                         $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-//                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
-                    $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: ... MB', ['%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+//                    $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: ... MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
                         break;
 
                     case 'cart':
                         $entries[] = $this->deleteOldCarts($full, $this->retentionDays[$table] ?? 180, $now);
                         $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-//                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
-                        $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: ... MB', ['%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+//                        $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: ... MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
                         break;
 
                     case 'connections_source':
                         $entries[] = $this->deleteOrphans($full, $this->prefix . 'connections', 'id_connections', $now);
                         $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-//                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
-                        $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: ... MB', ['%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+//                        $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: ... MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
                         break;
 
                     case 'guest':
                         $entries[] = $this->deleteOrphansGuest($full, $this->prefix . 'connections', 'id_guest', $now);
                         $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-//                        $entries[] = $this->originTag . " " . "[$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
-                        $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: ... MB', ['%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " " . "[$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+//                        $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: ... MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
                         break;
 
                     case 'cart_product':
                         $entries[] = $this->deleteOrphans($full, $this->prefix . 'cart', 'id_cart', $now);
                         $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-//                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
-                        $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: ... MB', ['%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+//                        $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: ... MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
                         break;
 
                     default:
 //                        $entries[] = $this->originTag . " [$now] Table $full | Aucun traitement défini.";
-                        $entries[] = $this->originTag . " "  . $this->translator->trans('[$now] Table %full% | No processing defined.', ['%full%' => $full], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " "  . $this->translator->trans('[%now%] Table %full% | No processing defined.', ['%now%'=> $now, '%full%' => $full], 'Modules.Sj4webcleaningdb.Admin');
                         $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-//                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
-                        $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: ... MB', ['%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
+                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+//                        $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: ... MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $beforeSize], 'Modules.Sj4webcleaningdb.Admin');
                 }
             }
         }
@@ -128,8 +132,8 @@ class Sj4webCleaningDbRunner
         if ($this->isOptimizeEnabled) {
             $entries = array_merge($entries, $this->optimizeTables($now));
         } else {
-//            $entries[] = $this->originTag . " [$now] Optimisation désactivée globalement.";
-            $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Optimization globally disabled.', [], 'Modules.Sj4webcleaningdb.Admin');
+            $entries[] = $this->originTag . " [$now] Optimisation désactivée globalement.";
+//            $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Optimization globally disabled.', [], 'Modules.Sj4webcleaningdb.Admin');
         }
 
         foreach ($tableSizesToLog as $table => $info) {
@@ -137,8 +141,8 @@ class Sj4webCleaningDbRunner
             // $afterSize = $this->getTableSize($full);
             $afterSize = TableCleanerHelper::getTableSize($this->db, $full, _DB_NAME_);
             $gain = round($info['before'] - $afterSize, 2);
-//            $entries[$info['index']] = $this->originTag . " [$now] Table $full | Taille avant : {$info['before']} Mo | Taille après : {$afterSize} Mo | Gain : {$gain} Mo";
-            $entries[$info['index']] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB', ['%full%' => $full, '%before%' => $info['before'], '%after%' => $afterSize, '%gain%' => $gain], 'Modules.Sj4webcleaningdb.Admin');
+            $entries[$info['index']] = $this->originTag . " [$now] Table $full | Taille avant : {$info['before']} Mo | Taille après : {$afterSize} Mo | Gain : {$gain} Mo";
+//            $entries[$info['index']] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB', ['%now%'=> $now, '%full%' => $full, '%before%' => $info['before'], '%after%' => $afterSize, '%gain%' => $gain], 'Modules.Sj4webcleaningdb.Admin');
         }
 
         file_put_contents($this->logFile, implode("\n", $entries) . "\n", FILE_APPEND);
@@ -180,11 +184,11 @@ class Sj4webCleaningDbRunner
                 TableCleanerHelper::optimizeAnalyse($this->db, $full);
                 TableCleanerHelper::forceRebuild($this->db, $full);
                 $res_flush = TableCleanerHelper::safeFlushTable($this->db, $full);
-//                $entries[] = sprintf('%s [%s] Table %s | Check + Analyse + Optimisation + Rebuild OK | Flush : %s', $this->originTag, $now, $full, $res_flush ? 'OK' : 'KO');
-                $entries[] = $this->translator->trans('%tag% [%now%] Table %full% | Check + Analyze + Optimize + Rebuild OK | Flush: %flush%', ['%tag%' => $this->originTag, '%now%' => $now, '%full%' => $full, '%flush%' => $res_flush ? 'OK' : 'KO'], 'Modules.Sj4webcleaningdb.Admin');
+                $entries[] = sprintf('%s [%s] Table %s | Check + Analyse + Optimisation + Rebuild OK | Flush : %s', $this->originTag, $now, $full, $res_flush ? 'OK' : 'KO');
+//                $entries[] = $this->translator->trans('%tag% [%now%] Table %full% | Check + Analyze + Optimize + Rebuild OK | Flush: %flush%', ['%tag%' => $this->originTag, '%now%' => $now, '%full%' => $full, '%flush%' => $res_flush ? 'OK' : 'KO'], 'Modules.Sj4webcleaningdb.Admin');
             } catch (Exception $e) {
-//                $entries[] = $this->originTag . " [$now] Table $full | Erreur OPTIMIZE : " . $e->getMessage();
-                $entries[] = $this->originTag . " " . $this->translator->trans('[$now] Table %full% | OPTIMIZE error:', ['%full%' => $full], 'Modules.Sj4webcleaningdb.Admin') . $e->getMessage();
+                $entries[] = $this->originTag . " [$now] Table $full | Erreur OPTIMIZE : " . $e->getMessage();
+//                $entries[] = $this->originTag . " " . $this->translator->trans('[%now%] Table %full% | OPTIMIZE error:', ['%now%'=> $now, '%full%' => $full], 'Modules.Sj4webcleaningdb.Admin') . $e->getMessage();
             }
         }
 
@@ -202,8 +206,8 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
 
-//        return $this->originTag . " [$now] Table $table | Suppression > $days jours | Supprimés : $count";
-        return $this->originTag . " " . $this->translator->trans('[$now] Table %table% | Removed entries older than %days% days | Deleted: %count%', ['%table%' => $table, '%days%' => $days, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
+        return $this->originTag . " [$now] Table $table | Suppression > $days jours | Supprimés : $count";
+//        return $this->originTag . " " . $this->translator->trans('[%now%] Table %table% | Removed entries older than %days% days | Deleted: %count%', ['%now%'=> $now, '%table%' => $table, '%days%' => $days, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
 
 
     }
@@ -225,8 +229,8 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
 
-//        return $this->originTag . " [$now] Table $table | Suppression > $days jours | Supprimés : $count";
-        return $this->originTag . " " . $this->translator->trans('[$now] Table %table% | Suppression > %days% jours | Supprimés : %count%', ['%table%' => $table, '%days%' => $days, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
+        return $this->originTag . " [$now] Table $table | Suppression > $days jours | Supprimés : $count";
+//        return $this->originTag . " " . $this->translator->trans('[%now%] Table %table% | Suppression > %days% jours | Supprimés : %count%', ['%now%'=> $now, '%table%' => $table, '%days%' => $days, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
 
 
     }
@@ -247,8 +251,8 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
 
-//        return $this->originTag . " [$now] Table $table | Suppression orphelins ($foreignKey) | Supprimés : $count";
-        return $this->originTag . " " . $this->translator->trans('[$now] Table %table% | Suppression orphelins (%foreignKey%) | Supprimés : %count%', ['%table%' => $table, '%foreignKey%' => $foreignKey, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
+        return $this->originTag . " [$now] Table $table | Suppression orphelins ($foreignKey) | Supprimés : $count";
+//        return $this->originTag . " " . $this->translator->trans('[%now%] Table %table% | Suppression orphelins (%foreignKey%) | Supprimés : %count%', ['%now%'=> $now, '%table%' => $table, '%foreignKey%' => $foreignKey, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
 
 
     }
@@ -269,8 +273,8 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
 
-//        return $this->originTag . " [$now] Table $table | Suppression orphelins ($foreignKey) | Supprimés : $count";
-        return $this->originTag . " " . $this->translator->trans('[$now] Table %table% | Removed orphans (%foreignKey%) | Deleted: %count%', ['%table%' => $table, '%foreignKey%' => $foreignKey, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
+        return $this->originTag . " [$now] Table $table | Suppression orphelins ($foreignKey) | Supprimés : $count";
+//        return $this->originTag . " " . $this->translator->trans('[%now%] Table %table% | Removed orphans (%foreignKey%) | Deleted: %count%', ['%now%'=> $now, '%table%' => $table, '%foreignKey%' => $foreignKey, '%count%' => $count], 'Modules.Sj4webcleaningdb.Admin');
 
 
     }
@@ -292,8 +296,8 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
 
-//        return $this->originTag . " [$now] Table $table | Suppression paniers inactifs > $days jours | Supprimés : $count";
-        return $this->originTag . " " . $this->translator->trans('[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%',['%table%' => $table,'%days%' => $days,'%count%' => $count,],'Modules.Sj4webcleaningdb.Admin');
+        return $this->originTag . " [$now] Table $table | Suppression paniers inactifs > $days jours | Supprimés : $count";
+//        return $this->originTag . " " . $this->translator->trans('[%now%] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%',['%now%'=> $now, '%table%' => $table,'%days%' => $days,'%count%' => $count,],'Modules.Sj4webcleaningdb.Admin');
     }
 
     /**

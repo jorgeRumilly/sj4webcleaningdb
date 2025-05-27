@@ -22,7 +22,7 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
         parent::initContent();
 
         $this->context->smarty->assign([
-            'cron_url' => Tools::getHttpHost(true) . __PS_BASE_URI__ . 'modules/sj4webcleaningdb/cron.php?token=' . Configuration::get('SJ4WEB_CLEANINGDB_CRON_TOKEN'),
+            'cron_url' => Context::getContext()->link->getModuleLink('sj4webcleaningdb', 'cron', ['token' => Configuration::get('SJ4WEB_CLEANINGDB_CRON_TOKEN')]),
             'link_to_logs'   => $this->context->link->getAdminLink('AdminSj4webCleaningDbLog'),
             'table_dependencies' => [
                 'cart'        => ['cart_product'],
@@ -67,6 +67,7 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
                 }
             }
 
+            // Enregistrer les tables activées
             Configuration::updateValue('SJ4WEB_CLEANINGDB_ENABLED_TABLES', json_encode($enabledTables));
 
             // Enregistrer les jours de rétention
@@ -201,7 +202,7 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
             'label' => $this->trans('Log retention period (months)', [], 'Modules.Sj4webcleaningdb.Admin'),
             'name' => 'log_retention_months',
             'class' => 'fixed-width-sm',
-            'desc' => $this->trans('Les fichiers de logs plus anciens seront automatiquement supprimés.', [], 'Modules.Sj4webcleaningdb.Admin'),
+            'desc' => $this->trans('Older log files will be automatically deleted.', [], 'Modules.Sj4webcleaningdb.Admin'),
         ];
 
         $helper = new HelperForm();

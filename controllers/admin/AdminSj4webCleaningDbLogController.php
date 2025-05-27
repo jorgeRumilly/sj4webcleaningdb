@@ -53,7 +53,6 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
         $this->context->smarty->assign([
             'content' => $this->content,
         ]);
-
     }
 
     private function getLogDates(): array

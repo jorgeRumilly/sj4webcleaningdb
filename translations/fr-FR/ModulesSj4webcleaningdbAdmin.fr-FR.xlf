@@ -70,11 +70,15 @@
         <source>Optimize tables now</source>
         <target>Optimiser les tables maintenant</target>
       </trans-unit>
-      <trans-unit id="Enable cleanup for table &quot;%s&quot;">
-        <source>Enable cleanup for table "%s"</source>
-        <target>Activer le nettoyage de la table "%s"</target>
+      <trans-unit id="clean_table_label">
+        <source>Clean table "%s"</source>
+        <target>Nettoyer la table "%s"</target>
       </trans-unit>
-      <trans-unit id="Retention period for &quot;%s&quot;">
+      <trans-unit id="enable_cleanup_desc">
+        <source>Enable cleanup for table "%s".</source>
+        <target>Activer le nettoyage de la table "%s".</target>
+      </trans-unit>
+      <trans-unit id="retention_label">
         <source>Retention period for "%s"</source>
         <target>Durée de conservation pour "%s"</target>
       </trans-unit>

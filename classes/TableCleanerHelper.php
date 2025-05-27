@@ -126,10 +126,10 @@ class TableCleanerHelper
         $results = Db::getInstance()->executeS($sql);
 
         foreach ($results as $row) {
-            $table = str_replace($prefix, '', $row['table_name']);
+            $table = str_replace($prefix, '', ($row['table_name'] ?? $row['TABLE_NAME']));
             $stats[$table] = [
-                'rows' => (int)$row['table_rows'],
-                'size' => (float)$row['size_mb'],
+                'rows' => (int)($row['table_rows'] ?? $row['TABLE_ROWS']),
+                'size' => (float)($row['size_mb'] ?? $row['SIZE_MB']),
             ];
         }
 
