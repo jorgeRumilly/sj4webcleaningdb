@@ -64,7 +64,7 @@ class Sj4webCleaningDbRunner
      */
     public function runFromConfig()
     {
-        $entries = [];
+//        $entries = [];
         $tableSizesToLog = [];
         $now = date('Y-m-d H:i:s');
 
@@ -77,46 +77,37 @@ class Sj4webCleaningDbRunner
                 switch ($table) {
                     case 'connections':
                         $this->deleteOldConnection($full, $this->retentionDays[$table] ?? 90, $now);
-                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
-
                     case 'pagenotfound':
                     case 'statssearch':
                         $this->deleteOldByDate($full, $this->retentionDays[$table] ?? 90, $now);
-                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'cart':
                         $this->deleteOldCarts($full, $this->retentionDays[$table] ?? 180, $now);
-                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'connections_source':
                         $this->deleteOrphans($full, $this->prefix . 'connections', 'id_connections', $now);
-                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'guest':
                         $this->deleteOrphansGuest($full, $this->prefix . 'connections', 'id_guest', $now);
-                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-                        $entries[] = $this->originTag . " " . "[$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'cart_product':
                         $this->deleteOrphans($full, $this->prefix . 'cart', 'id_cart', $now);
-                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     default:
                         $this->logStructured('no_action_defined', ['table' => $full,], $now);
-
-                        $tableSizesToLog[$table] = ['index' => count($entries), 'before' => $beforeSize];
-                        $entries[] = $this->originTag . " [$now] Table $full | Taille avant : {$beforeSize} Mo | Taille après : ... Mo";
+                        $tableSizesToLog[$table] = ['before' => $beforeSize];
                 }
             }
         }
@@ -130,13 +121,11 @@ class Sj4webCleaningDbRunner
         foreach ($tableSizesToLog as $table => $info) {
             $full = $this->prefix . $table;
             $afterSize = TableCleanerHelper::getTableSize($this->db, $full, _DB_NAME_);
-            $gain = round($info['before'] - $afterSize, 2);
-//            $entries[$info['index']] = $this->originTag . " [$now] Table $full | Taille avant : {$info['before']} Mo | Taille après : {$afterSize} Mo | Gain : {$gain} Mo";
-            $this->logStructured('table_size_info', ['table' => $full, 'before' => $info['before'], 'after' => $afterSize, 'gain' => $gain,], $now);
+            $before = $this->formatFloat($info['before'], 2);
+            $after = $this->formatFloat($afterSize, 2);
+            $gain = $this->formatFloat($before - $after, 2);
+            $this->logStructured('table_size_info', ['table' => $full, 'before' => $before, 'after' => $after, 'gain' => $gain,], $now);
         }
-
-        file_put_contents($this->logFile, implode("\n", $entries) . "\n", FILE_APPEND);
-
         $this->cleanupOldLogs();
     }
 
@@ -165,7 +154,6 @@ class Sj4webCleaningDbRunner
     public function optimizeTables(string $now = null)
     {
         $now = $now ?: date('Y-m-d H:i:s');
-        $entries = [];
 
         foreach ($this->enabledTables as $table) {
             $full = $this->prefix . $table;
@@ -174,14 +162,10 @@ class Sj4webCleaningDbRunner
                 TableCleanerHelper::forceRebuild($this->db, $full);
                 $res_flush = TableCleanerHelper::safeFlushTable($this->db, $full);
                 $this->logStructured('table_optimized', ['table' => $full, 'flush' => $res_flush ? 'OK' : 'KO'], $now);
-//                $entries[] = sprintf('%s [%s] Table %s | Check + Analyse + Optimisation + Rebuild OK | Flush : %s', $this->originTag, $now, $full, $res_flush ? 'OK' : 'KO');
             } catch (Exception $e) {
-//                $entries[] = $this->originTag . " [$now] Table $full | Erreur OPTIMIZE : " . $e->getMessage();
                 $this->logStructured('optimize_error', ['table' => $full, 'error' => $e->getMessage()], $now);
             }
         }
-//        file_put_contents($this->logFile, implode("\n", $entries) . "\n", FILE_APPEND);
-//        return $entries;
     }
 
     protected function deleteOldConnection(string $table, int $days, string $now): void
@@ -193,7 +177,7 @@ class Sj4webCleaningDbRunner
         $this->backupTableData($table, $where);
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
-        $this->logStructured('rows_deleted_by_age', ['table' => $table, 'days' => $days, 'deleted_count' => $count, 'date_limit' => $dateLimit], $now);
+        $this->logStructured('rows_deleted_by_age', ['table' => $table, 'days' => $days, 'deleted' => $count, 'date_limit' => $dateLimit], $now);
     }
 
     /**
@@ -210,7 +194,7 @@ class Sj4webCleaningDbRunner
         $this->backupTableData($table, $where);
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
-        $this->logStructured('rows_deleted_by_age', ['table' => $table, 'days' => $days, 'deleted_count' => $count, 'date_limit' => $dateLimit], $now);
+        $this->logStructured('rows_deleted_by_age', ['table' => $table, 'days' => $days, 'deleted' => $count, 'date_limit' => $dateLimit], $now);
     }
 
     /**
@@ -296,8 +280,35 @@ class Sj4webCleaningDbRunner
     protected function logStructured(string $type, array $context, ?string $now = null): void
     {
         $now = $now ?: date('Y-m-d H:i:s');
-        $entry = ['timestamp' => $now, 'origin' => $this->originTag, 'type' => $type, 'context' => $context];
+
+        // Post-traitement : on convertit tous les float en string formatée
+        foreach ($context as $k => $v) {
+            if (is_float($v)) {
+                $context[$k] = number_format($v, 2, '.', '');
+            }
+        }
+
+        $entry = [
+            'timestamp' => $now,
+            'origin' => $this->originTag,
+            'type' => $type,
+            'context' => $context
+        ];
+
         file_put_contents($this->logFile, json_encode($entry, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND);
+    }
+
+
+    /**
+     * Formatage propre des valeurs flottantes (arrondi + nettoyage binaire)
+     *
+     * @param float|int|string $value
+     * @param int $precision
+     * @return float
+     */
+    protected function formatFloat($value, int $precision = 2): float
+    {
+        return (float) number_format((float) $value, $precision, '.', '');
     }
 
 

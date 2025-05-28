@@ -30,14 +30,16 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
                 $selected = key($logFiles);
             }
             $logContent = $this->readLogLines($selected);
+            $logRawLines = $this->getRawLinesFromLogContent($logContent);
             $logSummary = $this->getLogSummaryWithGain($logContent);
         }
 
         $this->context->smarty->assign([
-            'log_files'   => $logFiles,
-            'log_date'    => $selected,
-            'log_content' => $logContent,
+            'log_files' => $logFiles,
+            'log_date' => $selected,
+            'log_raw_lines' => $logRawLines,
             'log_summary' => $logSummary,
+            'log_content' => array_column($logContent, 'translated'),
             'form_action' => self::$currentIndex . '&token=' . $this->token,
         ]);
 
@@ -73,6 +75,13 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
         return $dates;
     }
 
+    /**
+     * Lit les lignes de log JSON et retourne un tableau associatif
+     * contenant les données d'origine + le texte traduit.
+     *
+     * @param string $date Format YYYY-MM-DD
+     * @return array
+     */
     protected function readLogLines(string $date): array
     {
         $file = $this->logDir . $date . '.log';
@@ -86,27 +95,40 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
         foreach ($lines as $line) {
             $entry = json_decode($line, true);
 
+            // Ligne invalide (non JSON), on la garde comme texte brut
             if (!is_array($entry) || !isset($entry['type'])) {
-                $formatted[] = htmlspecialchars($line);
+                $formatted[] = [
+                    'raw' => $line,
+                    'translated' => htmlspecialchars($line),
+                    'type' => 'invalid',
+                ];
                 continue;
+            }
+
+            $context = [];
+            foreach ($entry['context'] as $k => $v) {
+                $context['%' . $k . '%'] = $v;
             }
 
             $translated = $this->trans(
                 $this->getLogTranslationKey($entry['type']),
-                $entry['context'],
+                $context,
                 'Modules.Sj4webcleaningdb.Admin'
             );
 
-            $formatted[] = sprintf('%s [%s] %s',
-                htmlspecialchars($entry['origin'] ?? ''),
-                htmlspecialchars($entry['timestamp']),
-                $translated
-            );
+            $formatted[] = [
+                'raw' => $entry,
+                'translated' => sprintf('%s [%s] %s',
+                    htmlspecialchars($entry['origin'] ?? ''),
+                    htmlspecialchars($entry['timestamp']),
+                    $translated
+                ),
+                'type' => $entry['type'],
+            ];
         }
 
         return $formatted;
     }
-
 
     /**
      * Analyse un contenu de log et retourne un tableau synthétique par table
@@ -115,37 +137,47 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
      * @param array $logLines Contenu brut du log.
      * @return array Tableau associatif structuré par table.
      */
+    /**
+     * Résume les opérations de nettoyage depuis les logs (au format enrichi).
+     *
+     * @param array $logLines Tableau de lignes issues de readLogLines()
+     * @return array Résumé par table
+     */
     protected function getLogSummaryWithGain(array $logLines): array
     {
         $summary = [];
 
-        foreach ($logLines as $line) {
-            // Skip already translated string lines
-            if (!str_starts_with($line, '{')) {
+        foreach ($logLines as $entry) {
+            if (!isset($entry['raw']) || !is_array($entry['raw'])) {
                 continue;
             }
 
-            $entry = json_decode($line, true);
-            if (!is_array($entry) || !isset($entry['type'])) {
-                continue;
-            }
-
-            $ctx = $entry['context'];
-            $type = $entry['type'];
+            $raw = $entry['raw'];
+            $type = $raw['type'] ?? null;
+            $ctx = $raw['context'] ?? [];
             $table = $ctx['table'] ?? null;
-            if (!$table) continue;
+            if (!$type || !$table) {
+                continue;
+            }
 
-            $summary[$table] ??= ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0.0, 'after' => 0.0];
+            $summary[$table] ??= [
+                'delete'   => 0,
+                'optimize' => false,
+                'tags'     => [],
+                'before'   => 0.0,
+                'after'    => 0.0,
+            ];
 
-            if (!empty($entry['origin']) && !in_array($entry['origin'], $summary[$table]['tags'])) {
-                $summary[$table]['tags'][] = trim($entry['origin'], '[]');
+            $origin = trim($raw['origin'] ?? '', '[]');
+            if ($origin && !in_array($origin, $summary[$table]['tags'], true)) {
+                $summary[$table]['tags'][] = $origin;
             }
 
             switch ($type) {
                 case 'rows_deleted_by_age':
                 case 'orphans_deleted':
                 case 'old_carts_deleted':
-                    $summary[$table]['delete'] += (int)($ctx['deleted'] ?? 0);
+                    $summary[$table]['delete'] += (int)($ctx['deleted'] ?? $ctx['deleted_count'] ?? 0);
                     break;
 
                 case 'table_optimized':
@@ -153,14 +185,16 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
                     break;
 
                 case 'table_size_info':
-                    $summary[$table]['before'] = (float)($ctx['before'] ?? 0.0);
-                    $summary[$table]['after'] = (float)($ctx['after'] ?? 0.0);
+                    $summary[$table]['before'] += (float)($ctx['before'] ?? 0.0);
+                    $summary[$table]['after']  += (float)($ctx['after'] ?? 0.0);
                     break;
             }
         }
 
         foreach ($summary as &$row) {
-            $row['gain'] = round($row['before'] - $row['after'], 2);
+            $row['before'] = round($row['before'], 2);
+            $row['after']  = round($row['after'], 2);
+            $row['gain']   = round($row['before'] - $row['after'], 2);
         }
 
         ksort($summary);
@@ -168,74 +202,57 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
     }
 
 
-//    private function getLogSummaryWithGain(string $logContent): array
-//    {
-//        $summary = [];
-//
-//        foreach (explode("\n", $logContent) as $line) {
-//            // Suppressions
-//            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Suppression.*?\| Supprimés : (\d+)#', $line, $m)) {
-//                [$tag, $table, $count] = [$m[1] ?? null, $m[2], (int)$m[3]];
-//                if (!isset($summary[$table])) {
-//                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0.00, 'after' => 0.00];
-//                }
-//                $summary[$table]['delete'] += $count;
-//                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
-//                    $summary[$table]['tags'][] = $tag;
-//                }
-//            }
-//
-//            // Optimisation
-//            if (preg_match('#(?:\[(CRON|BO|MANUEL)\]\s+)?\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s+Table (\w+)\s+\| Optimisée#', $line, $m)) {
-//                [$tag, $table] = [$m[1] ?? null, $m[2]];
-//                if (!isset($summary[$table])) {
-//                    $summary[$table] = ['delete' => 0, 'optimize' => false, 'tags' => [], 'before' => 0, 'after' => 0];
-//                }
-//                $summary[$table]['optimize'] = true;
-//                if ($tag && !in_array($tag, $summary[$table]['tags'])) {
-//                    $summary[$table]['tags'][] = $tag;
-//                }
-//            }
-//
-//            $line = str_replace('è', 'e', $line);
-//            // Taille avant (garder la 1ère valeur seulement)
-//            if (preg_match('#Table (\w+)\s+\| Taille avant : ([0-9.]+) Mo#', $line, $m)) {
-//                $table = $m[1];
-//                $val = (float) $m[2];
-//                if (!isset($summary[$table]['before']) || $summary[$table]['before'] === 0.0) {
-//                    $summary[$table]['before'] = $val;
-//                }
-//            }
-//
-//            // Taille après (écraser à chaque fois pour garder la dernière)
-//            if (preg_match('#Table (\w+).*?Taille apres : ([0-9.]+) Mo#', $line, $m)) {
-//                $summary[$m[1]]['after'] = (float) $m[2];
-//            }
-//        }
-//
-//        // Ajout du gain
-//        foreach ($summary as $table => &$data) {
-//            $data['gain'] = round($data['before'] - $data['after'], 2);
-//        }
-//
-//        ksort($summary);
-//        return $summary;
-//    }
-
+    /**
+     * Retourne la chaîne de traduction associée à un type de log structuré
+     *
+     * @param string $type
+     * @return string
+     */
     protected function getLogTranslationKey(string $type): string
     {
-        return match ($type) {
-            'table_size_info' => 'Table "%table%" | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB',
-            'rows_deleted_by_age' => 'Table "%table%" | Deleted rows older than %days% days: %deleted%',
-            'orphans_deleted' => 'Table "%table%" | Orphan cleanup (%foreign_key%): %deleted% removed',
-            'old_carts_deleted' => 'Table "%table%" | Inactive carts deleted (> %days% days): %deleted%',
-            'optimization_disabled' => 'Optimization is globally disabled.',
-            'table_optimized' => 'Table "%table%" | Optimization completed (Flush: %flush%)',
-            'optimize_error'  => 'Table "%table%" | Optimization error: %error%',
-            'no_action_defined' => 'Table "%table%" | No cleanup rule defined.',
-            'cleaning_disabled_globally' => 'Cleanup is globally disabled.',
-            default => '[Unknown log entry]'
-        };
+        switch ($type) {
+            case 'table_size_info':
+                return 'Table "%table%" | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB';
+            case 'rows_deleted_by_age':
+                return 'Table "%table%" | Deleted rows older than %days% days: %deleted%';
+            case 'orphans_deleted':
+                return 'Table "%table%" | Orphan cleanup (%foreign_key%): %deleted% removed';
+            case 'old_carts_deleted':
+                return 'Table "%table%" | Inactive carts deleted (> %days% days): %deleted%';
+            case 'optimization_disabled':
+                return 'Optimization is globally disabled.';
+            case 'table_optimized':
+                return 'Table "%table%" | Optimization completed (Flush: %flush%)';
+            case 'optimize_error':
+                return 'Table "%table%" | Optimization error: %error%';
+            case 'no_action_defined':
+                return 'Table "%table%" | No cleanup rule defined.';
+            case 'cleaning_disabled_globally':
+                return 'Cleanup is globally disabled.';
+            default:
+                return '[Unknown log entry]';
+        }
+    }
+
+    /**
+     * Extrait les lignes brutes (texte JSON ou autre) depuis le tableau enrichi du log.
+     *
+     * @param array $logContent
+     * @return array
+     */
+    protected function getRawLinesFromLogContent(array $logContent): array
+    {
+        $rawLines = [];
+
+        foreach ($logContent as $entry) {
+            if (isset($entry['raw']) && is_array($entry['raw'])) {
+                $rawLines[] = json_encode($entry['raw'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            } elseif (isset($entry['raw'])) {
+                $rawLines[] = (string) $entry['raw'];
+            }
+        }
+
+        return $rawLines;
     }
 
     public function renderForm()
@@ -252,24 +269,24 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
             'form' => [
                 'legend' => [
                     'title' => $this->trans('Log viewer', [], 'Modules.Sj4webcleaningdb.Admin'),
-                    'icon'  => 'icon-search'
+                    'icon' => 'icon-search'
                 ],
                 'input' => [
                     [
                         'type' => 'select',
                         'label' => $this->trans('Log date', [], 'Modules.Sj4webcleaningdb.Admin'),
-                        'name'  => 'log_date',
+                        'name' => 'log_date',
                         'options' => [
                             'query' => $options,
-                            'id'    => 'id_option',
-                            'name'  => 'name'
+                            'id' => 'id_option',
+                            'name' => 'name'
                         ],
                         'desc' => $this->trans('Choose the log date to display.', [], 'Modules.Sj4webcleaningdb.Admin'),
                     ]
                 ],
                 'submit' => [
                     'title' => $this->trans('Display logs', [], 'Modules.Sj4webcleaningdb.Admin'),
-                    'name'  => 'submit_view_logs'
+                    'name' => 'submit_view_logs'
                 ]
             ]
         ];
@@ -279,7 +296,7 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
         $helper->name_controller = $this->module->name;
         $helper->token = $this->token;
         $helper->currentIndex = self::$currentIndex . '&configure=' . $this->module->name . '&controller=AdminSj4webCleaningDbLog';
-        $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
+        $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ?: 0;
         $helper->show_cancel_button = false;
         $helper->toolbar_scroll = false;

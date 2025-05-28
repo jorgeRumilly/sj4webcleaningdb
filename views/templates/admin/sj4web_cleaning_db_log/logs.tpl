@@ -74,7 +74,9 @@
             <i class="icon-file"></i> {l s='Raw content of the log file' d='Modules.Sj4webcleaningdb.Admin'} : <strong>{$log_date}</strong>
         </div>
         <div class="panel-body">
-            <pre style="max-height: 400px; overflow: auto; background: #f9f9f9; border: 1px solid #ccc; padding: 10px;">{$log_content|escape:'htmlall':'UTF-8'}</pre>
+            <pre class="log-raw">{foreach from=$log_content item=line}{$line|escape:'htmlall'}<br>{/foreach}</pre>
+            {*{if $log_raw_lines}<pre class="log-raw">{foreach $log_raw_lines as $line}{$line|escape:'htmlall'}<br>{/foreach}</pre>{/if}*}
+            {* <pre class="log-raw">{$log_content|escape:'htmlall'}</pre>*}
         </div>
     </div>
 {/if}
