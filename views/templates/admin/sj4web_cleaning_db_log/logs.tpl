@@ -9,7 +9,7 @@
 {else}
     <div class="panel">
         <div class="panel-heading">
-            <i class="icon-file-text"></i> {l s='Available log files' d='Modules.Sj4webcleaningdb.Admin'}
+            <i class="icon-file-text"></i> {l s='Cleaning summary' d='Modules.Sj4webcleaningdb.Admin'}
         </div>
         <div class="panel-body">
             {if $log_summary && $log_summary|count > 0}

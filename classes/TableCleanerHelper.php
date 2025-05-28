@@ -166,5 +166,82 @@ class TableCleanerHelper
         ];
     }
 
+    /**
+     * Récupère la ou les adresses e-mail de destination pour l'envoi du rapport de nettoyage.
+     * Si désactivé ou aucun e-mail trouvé, renvoie un tableau vide.
+     *
+     * @return string[] Tableau d'adresses e-mail
+     */
+    public static function getCleaningReportEmails(): array
+    {
+
+        $rawEmails = trim((string)Configuration::get('SJ4WEB_CLEANINGDB_MAIL_RECIPIENTS'));
+        if (!$rawEmails) {
+            $default = Configuration::get('PS_SHOP_EMAIL');
+            return $default ? [$default] : [];
+        }
+
+        // Support de plusieurs e-mails séparés par virgule ou retour à la ligne
+        $emails = preg_split('/[\s,]+/', $rawEmails, -1, PREG_SPLIT_NO_EMPTY);
+        return array_filter($emails, function ($e) {
+            return Validate::isEmail($e);
+        });
+    }
+
+    /**
+     * Envoie un email de rapport de nettoyage à la fin du processus.
+     *
+     * @param array $deletedByTable Tableau associatif [nom_table => nb_lignes_supprimées]
+     * @param string|null $date Date du nettoyage (format 'Y-m-d H:i:s'), ou null pour maintenant
+     */
+    public static function sendCleaningReportEmail(array $deletedByTable, ?string $date = null, $translator = null): void
+    {
+
+        $recipients = self::getCleaningReportEmails();
+        if (empty($recipients)) {
+            return;
+        }
+
+        $shopName = Configuration::get('PS_SHOP_NAME');
+        $psVersion = _PS_VERSION_;
+        $dateText = $date ?: date('Y-m-d H:i:s');
+
+        // Construction des lignes HTML/TXT
+        $rowsHtml = '';
+        $rowsTxt = '';
+        foreach ($deletedByTable as $table => $deleted) {
+            $escaped = htmlspecialchars($table);
+            $rowsHtml .= "<tr><td>{$escaped}</td><td>{$deleted}</td></tr>\n";
+            $rowsTxt .= "{$table}: {$deleted}\n";
+        }
+
+        // Données pour Mail::Send
+        $templateVars = [
+            '{shop_name}' => $shopName,
+            '{date}' => $dateText,
+            '{cleaning_date}' => $dateText, // au cas où
+            '{rows}' => $rowsHtml,
+            '{ps_version}' => $psVersion,
+            '{cleaning_summary}' => $rowsHtml, // fallback
+        ];
+
+        $object = $shopName . ' ' . (($translator) ? $translator->trans('– Cleaning Report', [], 'Modules.Sj4webcleaningdb.Admin') : ' – Cleaning Report');
+
+        foreach ($recipients as $email) {
+            Mail::Send(
+                (int)Context::getContext()->language->id,
+                'cleaning_report',
+                $object,
+                $templateVars,
+                $email,
+                null, // nom destinataire
+                Configuration::get('PS_SHOP_EMAIL'), Configuration::get('PS_SHOP_NAME'), // expéditeur
+                null, null, // attachements
+                _PS_MODULE_DIR_ . 'sj4webcleaningdb/mails/',
+                false,
+                (int)Context::getContext()->shop->id
+            );
+        }
+    }
 
 }

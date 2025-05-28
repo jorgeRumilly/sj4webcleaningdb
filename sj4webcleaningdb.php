@@ -10,7 +10,7 @@ class Sj4webCleaningDb extends Module
     {
         $this->name = 'sj4webcleaningdb';
         $this->tab = 'administration';
-        $this->version = '1.1.1';
+        $this->version = '1.1.2';
         $this->author = 'SJ4WEB.FR';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -79,6 +79,8 @@ class Sj4webCleaningDb extends Module
             'SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED'    => 1,
             'SJ4WEB_CLEANINGDB_ENABLE_BACKUP'       => 0,
             'SJ4WEB_CLEANINGDB_LOG_RETENTION'       => 3,
+            'SJ4WEB_CLEANINGDB_MAIL_ENABLE'         => 0,
+            'SJ4WEB_CLEANINGDB_MAIL_RECIPIENTS'     => '',
         ];
         foreach ($defaults as $key => $value) {
             Configuration::updateValue($key, $value);
@@ -99,7 +101,9 @@ class Sj4webCleaningDb extends Module
             && Configuration::deleteByName('SJ4WEB_CLEANINGDB_ENABLED')
             && Configuration::deleteByName('SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED')
             && Configuration::deleteByName('SJ4WEB_CLEANINGDB_ENABLE_BACKUP')
-            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_LOG_RETENTION');
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_LOG_RETENTION')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_MAIL_ENABLE')
+            && Configuration::deleteByName('SJ4WEB_CLEANINGDB_MAIL_RECIPIENTS');
     }
 
     public function isUsingNewTranslationSystem()

@@ -1,5 +1,26 @@
 # 📝 Changelog - sj4webcleaningdb
 
+## [1.1.2] - Envoi automatique par email du rapport de nettoyage
+
+### ✅ Ajouté :
+- Envoi automatique d’un **email récapitulatif** à la fin de chaque nettoyage :
+  - **Option activable/désactivable** dans le BO
+  - Destinataires configurables (**plusieurs emails**, séparés par virgule)
+  - Si vide, envoi à **l’email de la boutique**
+- Résumé du nettoyage dans l’email :
+  - Liste des tables nettoyées
+  - Nombre de lignes supprimées par table
+- Utilisation du **système natif de mail PrestaShop**
+- Ajout des templates email :
+  - `cleaning_report.html` / `cleaning_report.txt`
+  - Versions en **fr-FR** et **en-US**
+  - Traductions via `{l s=... d=Modules.Sj4webcleaningdb.Admin}`
+- Ajout de deux clés de configuration :
+  - `cleaning_mail_enabled`
+  - `cleaning_mail_recipients`
+- Nouvelle méthode : `TableCleanerHelper::getCleaningReportEmails()`
+
+
 ## [1.1.1] - Lecture enrichie des logs + Résumé BO
 
 ### ✅ Ajouté :

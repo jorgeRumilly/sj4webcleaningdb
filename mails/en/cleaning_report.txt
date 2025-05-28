@@ -1,0 +1,7 @@
+{shop_name} – Cleaning report
+
+This is an automatic summary of the database cleaning performed on {date}.
+
+{rows}
+
+Module: SJ4WEB - DB Cleaner

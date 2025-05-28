@@ -16,6 +16,8 @@ class Sj4webCleaningDbRunner
 
     protected $translator;
 
+    protected $notificationEmail;
+
     public function __construct($originTag = null, $translator = null)
     {
         $this->db = Db::getInstance();
@@ -26,6 +28,9 @@ class Sj4webCleaningDbRunner
 
         $this->isCleaningEnabled = (bool)Configuration::get('SJ4WEB_CLEANINGDB_ENABLED');
         $this->isOptimizeEnabled = (bool)Configuration::get('SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED');
+
+        $this->notificationEmail = (bool)Configuration::get('SJ4WEB_CLEANINGDB_MAIL_ENABLE');
+
 
         $this->originTag = $originTag ?: $this->detectOriginTag();
 
@@ -64,8 +69,8 @@ class Sj4webCleaningDbRunner
      */
     public function runFromConfig()
     {
-//        $entries = [];
         $tableSizesToLog = [];
+        $tableReportMail = [];
         $now = date('Y-m-d H:i:s');
 
         if (!$this->isCleaningEnabled) {
@@ -74,34 +79,35 @@ class Sj4webCleaningDbRunner
             foreach ($this->enabledTables as $table) {
                 $full = $this->prefix . $table;
                 $beforeSize = TableCleanerHelper::getTableSize($this->db, $full, _DB_NAME_);
+                $nbLines = 0;
                 switch ($table) {
                     case 'connections':
-                        $this->deleteOldConnection($full, $this->retentionDays[$table] ?? 90, $now);
+                        $nbLines = $this->deleteOldConnection($full, $this->retentionDays[$table] ?? 90, $now);
                         $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
                     case 'pagenotfound':
                     case 'statssearch':
-                        $this->deleteOldByDate($full, $this->retentionDays[$table] ?? 90, $now);
+                        $nbLines = $this->deleteOldByDate($full, $this->retentionDays[$table] ?? 90, $now);
                         $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'cart':
-                        $this->deleteOldCarts($full, $this->retentionDays[$table] ?? 180, $now);
+                        $nbLines = $this->deleteOldCarts($full, $this->retentionDays[$table] ?? 180, $now);
                         $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'connections_source':
-                        $this->deleteOrphans($full, $this->prefix . 'connections', 'id_connections', $now);
+                        $nbLines = $this->deleteOrphans($full, $this->prefix . 'connections', 'id_connections', $now);
                         $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'guest':
-                        $this->deleteOrphansGuest($full, $this->prefix . 'connections', 'id_guest', $now);
+                        $nbLines = $this->deleteOrphansGuest($full, $this->prefix . 'connections', 'id_guest', $now);
                         $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
                     case 'cart_product':
-                        $this->deleteOrphans($full, $this->prefix . 'cart', 'id_cart', $now);
+                        $nbLines = $this->deleteOrphans($full, $this->prefix . 'cart', 'id_cart', $now);
                         $tableSizesToLog[$table] = ['before' => $beforeSize];
                         break;
 
@@ -109,6 +115,7 @@ class Sj4webCleaningDbRunner
                         $this->logStructured('no_action_defined', ['table' => $full,], $now);
                         $tableSizesToLog[$table] = ['before' => $beforeSize];
                 }
+                $tableReportMail[$table] = $nbLines;
             }
         }
 
@@ -125,6 +132,10 @@ class Sj4webCleaningDbRunner
             $after = $this->formatFloat($afterSize, 2);
             $gain = $this->formatFloat($before - $after, 2);
             $this->logStructured('table_size_info', ['table' => $full, 'before' => $before, 'after' => $after, 'gain' => $gain,], $now);
+        }
+
+        if(!empty($tableReportMail) && $this->notificationEmail) {
+            TableCleanerHelper::sendCleaningReportEmail($tableReportMail, $now, $this->translator);
         }
         $this->cleanupOldLogs();
     }
@@ -168,7 +179,7 @@ class Sj4webCleaningDbRunner
         }
     }
 
-    protected function deleteOldConnection(string $table, int $days, string $now): void
+    protected function deleteOldConnection(string $table, int $days, string $now): int
     {
 
         $dateLimit = date('Y-m-d H:i:s', strtotime("-{$days} days"));
@@ -178,6 +189,7 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
         $this->logStructured('rows_deleted_by_age', ['table' => $table, 'days' => $days, 'deleted' => $count, 'date_limit' => $dateLimit], $now);
+        return $count;
     }
 
     /**
@@ -186,7 +198,7 @@ class Sj4webCleaningDbRunner
      * @param int $days
      * @param string $now
      */
-    protected function deleteOldByDate(string $table, int $days, string $now): void
+    protected function deleteOldByDate(string $table, int $days, string $now): int
     {
         $dateLimit = date('Y-m-d H:i:s', strtotime("-{$days} days"));
         $where = "`date_add` < '" . pSQL($dateLimit) . "'";
@@ -195,6 +207,7 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
         $this->logStructured('rows_deleted_by_age', ['table' => $table, 'days' => $days, 'deleted' => $count, 'date_limit' => $dateLimit], $now);
+        return $count;
     }
 
     /**
@@ -204,13 +217,14 @@ class Sj4webCleaningDbRunner
      * @param string $foreignKey
      * @param string $now
      */
-    protected function deleteOrphans(string $table, string $parentTable, string $foreignKey, string $now): void
+    protected function deleteOrphans(string $table, string $parentTable, string $foreignKey, string $now): int
     {
         $where = "`$foreignKey` NOT IN (SELECT DISTINCT `$foreignKey` FROM `$parentTable`)";
         $this->backupTableData($table, $where);
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
         $this->logStructured('orphans_deleted', ['table' => $table, 'foreign_key' => $foreignKey, 'deleted' => $count,], $now);
+        return $count;
     }
 
     /**
@@ -220,7 +234,7 @@ class Sj4webCleaningDbRunner
      * @param string $foreignKey
      * @param string $now
      */
-    protected function deleteOrphansGuest(string $table, string $parentTable, string $foreignKey, string $now): void
+    protected function deleteOrphansGuest(string $table, string $parentTable, string $foreignKey, string $now): int
     {
         $where = "`$foreignKey` NOT IN (SELECT DISTINCT `$foreignKey` FROM `$parentTable`) and `id_customer` = 0";
 
@@ -228,6 +242,7 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
         $this->logStructured('orphans_deleted', ['table' => $table, 'foreign_key' => $foreignKey, 'deleted' => $count,], $now);
+        return $count;
     }
 
     /**
@@ -236,7 +251,7 @@ class Sj4webCleaningDbRunner
      * @param int $days
      * @param string $now
      */
-    protected function deleteOldCarts(string $table, int $days, string $now): void
+    protected function deleteOldCarts(string $table, int $days, string $now): int
     {
         $dateLimit = date('Y-m-d H:i:s', strtotime("-{$days} days"));
         $where = "`id_cart` NOT IN (SELECT DISTINCT `id_cart` FROM `{$this->prefix}orders`)
@@ -246,6 +261,7 @@ class Sj4webCleaningDbRunner
         $sql = "DELETE FROM `$table` WHERE $where";
         $count = $this->db->execute($sql) ? $this->db->Affected_Rows() : 0;
         $this->logStructured('old_carts_deleted', ['table' => $table, 'days' => $days, 'deleted' => $count,], $now);
+        return $count;
     }
 
     /**

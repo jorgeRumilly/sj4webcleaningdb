@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{shop_name} – Cleaning report</title>
+</head>
+<body>
+<p><strong>{shop_name}</strong></p>
+<p>This is an automatic summary of the database cleaning performed on {date}.</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+    <tr>
+        <th>Table</th>
+        <th>Rows deleted</th>
+    </tr>
+    </thead>
+    <tbody>
+    {rows}
+    </tbody>
+</table>
+
+<p>Module: SJ4WEB - DB Cleaner</p>
+</body>
+</html>

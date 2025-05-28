@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{shop_name} – Rapport de nettoyage</title>
+</head>
+<body>
+<p><strong>{shop_name}</strong></p>
+<p>Ceci est un résumé automatique du nettoyage de la base de données effectué le {date}.</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+    <tr>
+        <th>Table</th>
+        <th>Lignes supprimées</th>
+    </tr>
+    </thead>
+    <tbody>
+    {rows}
+    </tbody>
+</table>
+
+<p>Module : SJ4WEB - Nettoyage BDD</p>
+</body>
+</html>

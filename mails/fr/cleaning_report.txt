@@ -1,0 +1,7 @@
+{shop_name} – Rapport de nettoyage
+
+Ceci est un résumé automatique du nettoyage effectué le {date}.
+
+{rows}
+
+Module : SJ4WEB - Nettoyage BDD

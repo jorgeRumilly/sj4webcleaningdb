@@ -42,6 +42,8 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
             Configuration::updateValue('SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED', (int) Tools::getValue('optimize_enabled'));
             Configuration::updateValue('SJ4WEB_CLEANINGDB_ENABLE_BACKUP', (int) Tools::getValue('enable_backup'));
             Configuration::updateValue('SJ4WEB_CLEANINGDB_LOG_RETENTION', (int) Tools::getValue('log_retention_months'));
+            Configuration::updateValue('SJ4WEB_CLEANINGDB_MAIL_ENABLE', (int) Tools::getValue('cleaning_mail_enabled'));
+            Configuration::updateValue('SJ4WEB_CLEANINGDB_MAIL_RECIPIENTS', Tools::getValue('cleaning_mail_recipients', ''));
 
             // Reconstruire enabled_tables à partir des checkbox individuelles
             $enabledTables = [];
@@ -205,6 +207,30 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
             'desc' => $this->trans('Older log files will be automatically deleted.', [], 'Modules.Sj4webcleaningdb.Admin'),
         ];
 
+        $fields_form['form']['input'][] = [
+            'type' => 'html',
+            'name' => 'html_data',
+            'html_content' => '<p>&nbsp;</p><h3>'.$this->trans('Email notification', [], 'Modules.Sj4webcleaningdb.Admin').'</h3>',
+        ];
+
+        $fields_form['form']['input'][] = [
+            'type' => 'switch',
+            'label' => $this->trans('Send cleaning summary by email', [], 'Modules.Sj4webcleaningdb.Admin'),
+            'name' => 'cleaning_mail_enabled',
+            'is_bool' => true,
+            'values' => [
+                ['id' => 'on', 'value' => 1, 'label' => $this->trans('Yes', [], 'Modules.Sj4webcleaningdb.Admin')],
+                ['id' => 'off', 'value' => 0, 'label' => $this->trans('No', [], 'Modules.Sj4webcleaningdb.Admin')],
+            ],
+        ];
+        $fields_form['form']['input'][] = [
+            'type' => 'textarea',
+            'label' => $this->trans('Email recipients (comma-separated)', [], 'Modules.Sj4webcleaningdb.Admin'),
+            'name' => 'cleaning_mail_recipients',
+            'desc' => $this->trans('Leave empty to use shop default email.', [], 'Modules.Sj4webcleaningdb.Admin'),
+            'autoload_rte' => false,
+        ];
+
         $helper = new HelperForm();
         $helper->module = $this->module;
         $helper->name_controller = $this->module->name;
@@ -220,6 +246,8 @@ class AdminSj4webCleaningDbController extends ModuleAdminController
             'optimize_enabled' => (int) Configuration::get('SJ4WEB_CLEANINGDB_OPTIMIZE_ENABLED'),
             'enable_backup' => (int) Configuration::get('SJ4WEB_CLEANINGDB_ENABLE_BACKUP'),
             'log_retention_months' => (int) Configuration::get('SJ4WEB_CLEANINGDB_LOG_RETENTION') ?: 3,
+            'cleaning_mail_enabled' => (int) Configuration::get('SJ4WEB_CLEANINGDB_MAIL_ENABLE'),
+            'cleaning_mail_recipients' => Configuration::get('SJ4WEB_CLEANINGDB_MAIL_RECIPIENTS') ?: '',
         ];
 
         foreach ($tables as $table => $info) {

@@ -138,9 +138,9 @@
         <source>No log file available at the moment.</source>
         <target>Aucun fichier de log disponible pour le moment.</target>
       </trans-unit>
-      <trans-unit id="Available log files">
-        <source>Available log files</source>
-        <target>Fichiers de log disponibles</target>
+      <trans-unit id="Cleaning summarys">
+        <source>Cleaning summary</source>
+        <target>Récapitulatif nettoyage</target>
       </trans-unit>
       <trans-unit id="Table">
         <source>Table</source>
@@ -242,46 +242,46 @@
       <source>Cleanup is globally disabled.</source>
       <target>Le nettoyage est désactivé globalement.</target>
     </trans-unit>
-      <trans-unit id="1" resname="[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%">
-        <source>[$now] Table %table% | Removed inactive carts older than %days% days | Deleted: %count%</source>
-        <target>[$now] Table %table% | Suppression paniers inactifs &gt; %days% jours | Supprimés : %count%</target>
-      </trans-unit>
-      <trans-unit id="2" resname="[$now] Table %table% | Removed orphans (%foreignKey%) | Deleted: %count%">
-        <source>[$now] Table %table% | Removed orphans (%foreignKey%) | Deleted: %count%</source>
-        <target>[$now] Table %table% | Suppression orphelins (%foreignKey%) | Supprimés : %count%</target>
-      </trans-unit>
-      <trans-unit id="3" resname="[$now] Table %table% | Removed entries older than %days% days | Deleted: %count%">
-        <source>[$now] Table %table% | Removed entries older than %days% days | Deleted: %count%</source>
-        <target>[$now] Table %table% | Suppression &gt; %days% jours | Supprimés : %count%</target>
-      </trans-unit>
-      <trans-unit id="4" resname="[$now] Table %full% | OPTIMIZE error:">
-        <source>[$now] Table %full% | OPTIMIZE error:</source>
-        <target>[$now] Table %full% | Erreur OPTIMIZE :</target>
-      </trans-unit>
-      <trans-unit id="5" resname="%tag% [%now%] Table %full% | Check + Analyze + Optimize + Rebuild OK | Flush: %flush%">
-        <source>%tag% [%now%] Table %full% | Check + Analyze + Optimize + Rebuild OK | Flush: %flush%</source>
-        <target>%tag% [%now%] Table %full% | Check + Analyse + Optimisation + Rebuild OK | Flush : %flush%</target>
-      </trans-unit>
-      <trans-unit id="6" resname="[$now] Table %full% | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB">
-        <source>[$now] Table %full% | Size before: %before% MB | Size after: %after% MB | Saved: %gain% MB</source>
-        <target>[$now] Table %full% | Taille avant : %before% Mo | Taille après : %after% Mo | Gain : %gain% Mo</target>
-      </trans-unit>
-      <trans-unit id="7" resname="[$now] Optimization globally disabled.">
-        <source>[$now] Optimization globally disabled.</source>
-        <target>[$now] Optimisation désactivée globalement.</target>
-      </trans-unit>
-      <trans-unit id="8" resname="[$now] Table %full% | Size before: %before% MB | Size after: ... MB">
-        <source>[$now] Table %full% | Size before: %before% MB | Size after: ... MB</source>
-        <target>[$now] Table %full% | Taille avant : %before% Mo | Taille après : ... Mo</target>
-      </trans-unit>
-      <trans-unit id="9" resname="[$now] Table %full% | No processing defined.">
-        <source>[$now] Table %full% | No processing defined.</source>
-        <target>[$now] Table %full% | Aucun traitement défini.</target>
-      </trans-unit>
-      <trans-unit id="10" resname="[$now] Cleanup globally disabled.">
-        <source>[$now] Cleanup globally disabled.</source>
-        <target>[$now] Nettoyage désactivé globalement.</target>
-      </trans-unit>	  
+    <trans-unit id="email_notification_title">
+      <source>Email notification</source>
+      <target>Notification par e-mail</target>
+    </trans-unit>
+    <trans-unit id="send_cleaning_summary_by_email">
+      <source>Send cleaning summary by email</source>
+      <target>Envoyer un récapitulatif du nettoyage par e-mail</target>
+    </trans-unit>
+    <trans-unit id="email_recipients">
+      <source>Email recipients (comma-separated)</source>
+      <target>Destinataires e-mail (séparés par une virgule)</target>
+    </trans-unit>
+    <trans-unit id="default_email_if_empty">
+      <source>Leave empty to use shop default email.</source>
+      <target>Laisser vide pour utiliser l’e-mail par défaut de la boutique.</target>
+    </trans-unit>
+    <trans-unit id="cleaning_report_subject">
+      <source>Cleaning Report – %shop_name%</source>
+      <target>Rapport de nettoyage – %shop_name%</target>
+    </trans-unit>
+    <trans-unit id="cleaning_report_intro">
+      <source>This is an automatic summary of the database cleaning performed on %date%.</source>
+      <target>Ceci est un récapitulatif automatique du nettoyage de la base de données effectué le %date%.</target>
+    </trans-unit>
+    <trans-unit id="cleaning_report_table_header">
+      <source>Table</source>
+      <target>Table</target>
+    </trans-unit>
+    <trans-unit id="cleaning_report_rows_header">
+      <source>Rows deleted</source>
+      <target>Lignes supprimées</target>
+    </trans-unit>
+    <trans-unit id="cleaning_report_footer">
+      <source>Module: SJ4WEB - DB Cleaner</source>
+      <target>Module : SJ4WEB - Nettoyeur BDD</target>
+    </trans-unit>
+    <trans-unit id="cleaning_report_object">
+      <source>– Cleaning Report</source>
+      <target>– Rapport de nettoyage</target>
+    </trans-unit>
     </body>
   </file>
 </xliff>

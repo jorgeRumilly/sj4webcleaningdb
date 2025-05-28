@@ -17,6 +17,8 @@ Il permet de supprimer les anciennes données inutiles (paniers expirés, connex
 - Tâche CRON sécurisée pour automatiser le nettoyage
 - Optimisation des tables (`OPTIMIZE TABLE`) après suppression
 - Traductions multilingues via système moderne PrestaShop 8+
+- Envoi automatique d’un **email récapitulatif** à la fin de chaque nettoyage
+- **Option activable** depuis le back-office
 
 ---
 
