@@ -1,5 +1,8 @@
 # 📝 Changelog - sj4webcleaningdb
 
+## [1.1.3] - Envoi automatique par email du rapport de nettoyage 
+- Corrige l'affichage de la page des logs lorsqu'il n'y a pas de logs
+
 ## [1.1.2] - Envoi automatique par email du rapport de nettoyage
 
 ### ✅ Ajouté :

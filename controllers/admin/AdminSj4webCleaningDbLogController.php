@@ -23,7 +23,8 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
 
         if (empty($logFiles)) {
             $selected = null;
-            $logContent = '';
+            $logContent = [];
+            $logRawLines = [];
             $logSummary = [];
         } else {
             if (!array_key_exists($selected, $logFiles)) {
