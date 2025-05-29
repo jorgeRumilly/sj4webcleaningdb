@@ -327,5 +327,15 @@ class Sj4webCleaningDbRunner
         return (float) number_format((float) $value, $precision, '.', '');
     }
 
+    /**
+     * Run a fake execution for testing purposes
+     * @return string
+     */
+    public function runFake():void
+    {
+        // Méthode de test pour simuler l'exécution sans toucher à la base de données
+        $this->logStructured('fake_run', ['message' => 'This is a fake run for testing purposes.'], date('Y-m-d H:i:s'));
+        echo "Fake run completed. Check the log file for details.\n";
+    }
 
 }

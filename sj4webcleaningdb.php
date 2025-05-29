@@ -10,7 +10,7 @@ class Sj4webCleaningDb extends Module
     {
         $this->name = 'sj4webcleaningdb';
         $this->tab = 'administration';
-        $this->version = '1.1.3';
+        $this->version = '1.2.0';
         $this->author = 'SJ4WEB.FR';
         $this->need_instance = 0;
         $this->bootstrap = true;

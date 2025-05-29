@@ -1,0 +1,9 @@
+Hello,
+
+An error occurred while running the database cleaning script via CLI:
+
+{message}
+
+Please check the execution log if necessary.
+
+— sj4webcleaningdb module
