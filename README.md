@@ -54,6 +54,32 @@ Exécute cette URL régulièrement via un cron job (ex. chaque nuit à 4h).
 
 ---
 
+## 💻 Exécution en ligne de commande (mode CLI)
+
+Depuis la version 1.2.0, le module peut être exécuté directement via une commande CLI.
+
+### ➤ Exemple :
+```bash
+php modules/sj4webcleaningdb/cli/run_cleaning.php
+```
+
+- Un mécanisme de verrouillage (`lock`) empêche l’exécution simultanée du processus.
+- En cas d’erreur, un mail est automatiquement envoyé à l’adresse de la boutique (ou adresse configurée à venir).
+- Un fichier de log texte est créé avec le détail de l'exécution (`logs/cli/YYYYMMDD_HHMMSS.log`).
+- Le traitement s’appuie sur la même configuration que dans le BO.
+
+### 📂 Emplacement du script :
+`/modules/sj4webcleaningdb/cli/run_cleaning.php`
+
+---
+
+## 📁 Dossier dev-tools
+
+Un dossier `dev-tools` est présent pour effectuer des tests en local (par exemple : tests de verrouillage parallèle).
+**⚠️ Ce dossier ne doit pas être inclus dans les versions de production.**
+
+---
+
 ## 📁 Logs
 
 - Les logs sont enregistrés dans `/modules/sj4webcleaningdb/logs/`

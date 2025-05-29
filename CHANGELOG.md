@@ -1,5 +1,20 @@
 # 📝 Changelog - sj4webcleaningdb
 
+## [1.2.0] - 2025-05-30 — Ajout du mode CLI et gestion avancée des erreurs
+
+### Added
+- Ajout d’un script CLI (`cli/run_cleaning.php`) pour lancer le nettoyage via la ligne de commande.
+- Ajout d’un système de verrouillage (`Sj4WebLockManager`) pour empêcher les exécutions concurrentes.
+- Envoi automatique d’un mail d’alerte en cas d’échec du processus CLI (`mails/fr/en/alerte.html/.txt`).
+- Génération d’un fichier log texte détaillé pour chaque exécution CLI (`logs/cli/*.log`).
+- Ajout du dossier `dev-tools` (tests non inclus dans les releases).
+
+### Fixed
+- Correction du chemin d’accès à `config.inc.php` pour compatibilité avec tous les environnements (Windows/Linux).
+
+### Changed
+- Refactorisation et nettoyage du script CLI.
+
 ## [1.1.3] - Envoi automatique par email du rapport de nettoyage 
 - Corrige l'affichage de la page des logs lorsqu'il n'y a pas de logs
 
