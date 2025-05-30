@@ -181,7 +181,6 @@ class Sj4webCleaningDbRunner
 
     protected function deleteOldConnection(string $table, int $days, string $now): int
     {
-
         $dateLimit = date('Y-m-d H:i:s', strtotime("-{$days} days"));
         $where = "`date_add` < '" . pSQL($dateLimit) . "' and `id_guest` NOT IN (SELECT DISTINCT `id_guest` FROM `{$this->prefix}guest` where id_customer > 0)";
 
