@@ -1,5 +1,17 @@
 # 📝 Changelog - sj4webcleaningdb
 
+## [1.2.0-php73] - 2025-05-30 — Version compatible PHP 7.3
+
+### 🎯 Spécifique à cette branche :
+- Retrait de toutes les syntaxes non compatibles PHP 7.3 :
+  - Suppression de l’opérateur `??=`.
+  - Retrait des types de retour (`: string`, `: array`, etc.).
+- Nettoyage pour assurer un fonctionnement stable sur des environnements PHP 7.3 (mutualisés basiques, anciens serveurs).
+
+### 📝 Notes :
+- Fonctionnalité identique à la branche principale **1.2.0**.
+- Prévu pour rester rétro-compatible avec PrestaShop 1.7.8.x et 8.0.x.
+
 ## [1.2.0] - 2025-05-30 — Ajout du mode CLI et gestion avancée des erreurs
 
 ### Added
@@ -48,7 +60,7 @@
 - Retour de l’affichage brut du fichier log (contenu JSON brut scrollable)
 - Traductions automatiques appliquées **à l’affichage BO uniquement** (le fichier `.log` reste en anglais)
 - Refactorisation complète de la méthode `readLogLines()` pour fournir un tableau exploitable (plus de `preg_match`)
-- Compatibilité renforcée PHP 7.4 : plus de `match`, code adapté proprement
+- Compatibilité renforcée PHP 7.3 : plus de `match`, code adapté proprement
 
 ### ♻️ Modifié :
 - Le tableau résumé n'exploite plus les chaînes traduites, mais les données JSON directement
@@ -88,7 +100,7 @@
   - **Vue brute** (contenu JSON horodaté)
   - **Vue synthétique** (résumé par table)
 - Système de traduction moderne PrestaShop 8+ (`trans()` + fichiers `.xlf` avec domaine `Modules.Sj4webcleaningdb.Admin`)
-- Compatibilité : PrestaShop **1.7.8 à 8.x**, PHP **>= 7.4**
+- Compatibilité : PrestaShop **1.7.8 à 8.x**, PHP **>= 7.3**
 
 ### ⚠️ Limitations connues :
 - Le module **ne prend pas en charge le multi-boutique**

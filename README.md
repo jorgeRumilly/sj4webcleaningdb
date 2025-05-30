@@ -25,7 +25,8 @@ Il permet de supprimer les anciennes données inutiles (paniers expirés, connex
 ## 🧩 Compatibilité
 
 - PrestaShop **1.7.8** à **8.x**
-- PHP **>= 7.4**
+- PHP **>= 7.3**
+⚠️ Une branche spécifique `1.2.0-php73` est disponible pour compatibilité PHP 7.3.
 
 ---
 

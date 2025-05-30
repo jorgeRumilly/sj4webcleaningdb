@@ -161,13 +161,15 @@ class AdminSj4webCleaningDbLogController extends ModuleAdminController
                 continue;
             }
 
-            $summary[$table] ??= [
-                'delete'   => 0,
-                'optimize' => false,
-                'tags'     => [],
-                'before'   => 0.0,
-                'after'    => 0.0,
-            ];
+            if (!isset($summary[$table])) {
+                $summary[$table] = [
+                    'delete'   => 0,
+                    'optimize' => false,
+                    'tags'     => [],
+                    'before'   => 0.0,
+                    'after'    => 0.0,
+                ];
+            }
 
             $origin = trim($raw['origin'] ?? '', '[]');
             if ($origin && !in_array($origin, $summary[$table]['tags'], true)) {
