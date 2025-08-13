@@ -5,4 +5,5 @@
 *.zip
 vendor/
 node_modules/
-"config_fr.xml" 
+./config_fr.xml
+config_fr.xml
