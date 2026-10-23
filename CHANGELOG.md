@@ -1,5 +1,32 @@
 # 📝 Changelog - sj4webcleaningdb
 
+## [1.3.0] - 2026-10-22 — Suppression par lots, backup sans blocage, optimisation ciblée
+
+### Fixed
+- Le nettoyage ne s'arrête plus à la première erreur `1062 Duplicate entry` : la copie vers les tables `save_*` utilise
+  désormais `INSERT IGNORE`. Une exécution interrompue entre la copie et la suppression bloquait auparavant toutes les
+  exécutions suivantes (observé en production de août 2025 à octobre 2026 : plus aucune purge, tables de statistiques
+  de plusieurs dizaines de Go).
+- Une erreur sur une table n'interrompt plus le nettoyage des tables suivantes (`table_error` dans le log).
+
+### Changed
+- Suppressions par lots (`SJ4WEB_CLEANINGDB_BATCH_SIZE`, 5000 lignes par défaut) avec pause entre lots et temporisation
+  automatique quand MariaDB est chargé (`Threads_running`) : plus de gros `DELETE ... NOT IN (SELECT ...)` en une seule requête.
+- Durée maximale d'un passage (`SJ4WEB_CLEANINGDB_MAX_MINUTES`, 25 min par défaut) : arrêt propre puis reprise au passage suivant
+  (`purge_time_limit` dans le log).
+- Les sous-requêtes `NOT IN (SELECT DISTINCT ...)` sont remplacées par `NOT EXISTS`.
+- Optimisation (`OPTIMIZE TABLE`) uniquement pour les tables ayant perdu au moins 100 000 lignes pendant le passage. Avant : reconstruction
+  complète chaque nuit de toutes les tables activées (`OPTIMIZE` + `ALTER TABLE ENGINE=InnoDB` + `COUNT(*)`), soit plusieurs Go réécrits à 4 h.
+  Le bouton « Optimize tables now » du BO continue d'optimiser toutes les tables activées.
+- L'option « backup » (tables `save_*`) reste désactivable dans le BO ; elle est désactivée par défaut à l'installation.
+
+### Added
+- `cli/purge_stats_batches.php` : script autonome de purge par lots des tables `connections`, `connections_source` et `guest`
+  (simulation par défaut, `--execute` pour supprimer, reprenable, verrou, temporisation).
+- `cli/drop_save_tables.php` : script autonome de suppression des tables d'archive `save_*` (simulation par défaut, double confirmation,
+  refuse si l'option de backup est encore active).
+- `upgrade/upgrade-1.3.0.php` : initialise les nouvelles clés de configuration.
+
 ## [1.2.0] - 2025-05-30 — Ajout du mode CLI et gestion avancée des erreurs
 
 ### Added

@@ -73,6 +73,41 @@ php modules/sj4webcleaningdb/cli/run_cleaning.php
 
 ---
 
+## 🧹 Purge manuelle des tables de statistiques (scripts autonomes)
+
+Deux scripts CLI indépendants du module (ils n'utilisent que `app/config/parameters.php`) : ils fonctionnent même si le module est en panne.
+Ils sont en **simulation par défaut** (aucune suppression sans `--execute`).
+
+```bash
+# 1. Simulation : combien de lignes seraient supprimées (rétention des connexions : 30 jours)
+php modules/sj4webcleaningdb/cli/purge_stats_batches.php --days=30
+
+# 2. Suppression réelle par lots (reprenable ; arrêt propre au bout de --max-minutes)
+php modules/sj4webcleaningdb/cli/purge_stats_batches.php --days=30 --execute --max-minutes=30
+
+# 3. (optionnel, hors heures de pointe) récupérer l'espace disque
+php modules/sj4webcleaningdb/cli/purge_stats_batches.php --days=30 --execute --optimize
+```
+
+⚠️ Ne pas lancer entre 03h45 et 04h45 (cron du module à 04h00).
+
+Suppression des tables d'archive `save_*` (inutiles) — désactiver d'abord l'option « backup » dans le BO :
+
+```bash
+php modules/sj4webcleaningdb/cli/drop_save_tables.php                                   # simulation
+php modules/sj4webcleaningdb/cli/drop_save_tables.php --execute --confirm=DROP-SAVE-TABLES
+```
+
+### Réglages de la suppression par lots (table `configuration`)
+
+| Clé | Défaut | Rôle |
+|---|---|---|
+| `SJ4WEB_CLEANINGDB_BATCH_SIZE` | 5000 | lignes examinées par lot |
+| `SJ4WEB_CLEANINGDB_MAX_MINUTES` | 25 | durée maximale d'un passage (reprise au passage suivant) |
+| `SJ4WEB_CLEANINGDB_ENABLE_BACKUP` | 0 | copie les lignes supprimées dans `save_*` (BO : option « backup ») |
+
+---
+
 ## 📁 Dossier dev-tools
 
 Un dossier `dev-tools` est présent pour effectuer des tests en local (par exemple : tests de verrouillage parallèle).

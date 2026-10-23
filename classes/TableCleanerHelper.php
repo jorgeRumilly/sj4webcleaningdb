@@ -3,7 +3,9 @@
 class TableCleanerHelper
 {
     /**
-     * Optimize a table by running ANALYZE, CHECK, and OPTIMIZE commands
+     * Optimise une table (OPTIMIZE TABLE).
+     * Sous InnoDB, OPTIMIZE reconstruit la table et met à jour ses statistiques : pas besoin d'ANALYZE ni d'un
+     * SELECT COUNT(*) complet derrière (qui parcourait toute la table, plusieurs Go sur connections_source).
      * @param Db $db
      * @param string $table
      * @throws Exception
@@ -12,8 +14,6 @@ class TableCleanerHelper
     {
         try {
             $db->execute("OPTIMIZE TABLE `$table`");
-            $db->execute("ANALYZE TABLE `$table`");
-            $db->execute("SELECT COUNT(*) FROM `$table`");
         } catch (Exception $e) {
             throw new Exception('Error optimizing table: ' . $e->getMessage());
         }
@@ -154,13 +154,14 @@ class TableCleanerHelper
     public static function getTablesConfig(): array
     {
         return [
-            'connections' => ['label' => 'Connections', 'clean_type' => 'date'],
-            'connections_source' => ['label' => 'Connections source', 'clean_type' => 'orphan'],
-            'guest' => ['label' => 'Guests', 'clean_type' => 'orphan'],
-            'cart' => ['label' => 'Paniers', 'clean_type' => 'date'],
-            'cart_product' => ['label' => 'Produits panier', 'clean_type' => 'orphan'],
-            'pagenotfound' => ['label' => 'Pages 404', 'clean_type' => 'date'],
-            'statssearch' => ['label' => 'Recherches', 'clean_type' => 'date'],
+            // batch_key : colonne indexée utilisée pour parcourir la table par lots lors des suppressions
+            'connections' => ['label' => 'Connections', 'clean_type' => 'date', 'batch_key' => 'id_connections'],
+            'connections_source' => ['label' => 'Connections source', 'clean_type' => 'orphan', 'batch_key' => 'id_connections_source'],
+            'guest' => ['label' => 'Guests', 'clean_type' => 'orphan', 'batch_key' => 'id_guest'],
+            'cart' => ['label' => 'Paniers', 'clean_type' => 'date', 'batch_key' => 'id_cart'],
+            'cart_product' => ['label' => 'Produits panier', 'clean_type' => 'orphan', 'batch_key' => 'id_cart'],
+            'pagenotfound' => ['label' => 'Pages 404', 'clean_type' => 'date', 'batch_key' => 'id_pagenotfound'],
+            'statssearch' => ['label' => 'Recherches', 'clean_type' => 'date', 'batch_key' => 'id_statssearch'],
 //            'mail' => ['label' => 'Mails', 'clean_type' => 'date'],
 //            'log' => ['label' => 'Logs', 'clean_type' => 'date'],
         ];
